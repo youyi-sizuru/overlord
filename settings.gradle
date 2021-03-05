@@ -1,0 +1,8 @@
+include ':app'
+include ':base'
+project(":base").projectDir = file("treasure-box/base")
+include ':widget'
+project(":widget").projectDir = file("treasure-box/widget")
+include ':utils'
+project(":utils").projectDir = file("treasure-box/utils")
+rootProject.name = "overlord"
