@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:fitsSystemWindows="true"
@@ -15,15 +13,11 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:background="?colorPrimary"
-            app:title="工具箱"
             app:titleTextColor="@color/white" />
 
-        <com.lifefighter.widget.list.ExRecyclerView
-            android:id="@+id/list"
+        <com.lifefighter.widget.web.ExWebView
+            android:id="@+id/web"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
+            android:layout_height="match_parent" />
     </LinearLayout>
 </layout>
