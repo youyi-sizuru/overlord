@@ -95,17 +95,6 @@ class MihoyoRequestInterceptor : Interceptor {
         private val charList =
             ('a'..'z').toList().plus((0..9).map { it.toString().toCharArray().first() })
         private val UUID_NAMESPACE = UUID.fromString("6ba7b811-9dad-11d1-80b4-00c04fd430c8")
-        private fun toBytes(uuid: UUID): ByteArray {
-            // inverted logic of fromBytes()
-            val out = ByteArray(16)
-            val msb = uuid.mostSignificantBits
-            val lsb = uuid.leastSignificantBits
-            for (i in 0..7)
-                out[i] = (msb shr (7 - i) * 8 and 0xff).toByte()
-            for (i in 8..15)
-                out[i] = (lsb shr (15 - i) * 8 and 0xff).toByte()
-            return out
-        }
     }
 }
 
@@ -119,6 +108,7 @@ class MihoyoDataConverterFactory : Converter.Factory() {
         return MihoyoDataConverter<Any>(type)
     }
 }
+
 
 class MihoyoDataConverter<T>(private val type: Type) : Converter<ResponseBody, T> {
     override fun convert(value: ResponseBody): T? {
