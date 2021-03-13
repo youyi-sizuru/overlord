@@ -1,3 +1,4 @@
 [submodule "treasure-box"]
 	path = treasure-box
 	url = git@github.com:youyi-sizuru/treasure-box.git
+	branch = main

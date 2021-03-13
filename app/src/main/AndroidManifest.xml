@@ -24,7 +24,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".action.sign.MihoyoAutoSignActivity"
+            android:name=".action.sign.AddMihoyoAccountActivity"
+            android:label="@string/add_mihoyo_account_title"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".action.sign.MihoyoSignConfigActivity"
             android:label="@string/mihoyo_auto_sign_title"
             android:screenOrientation="portrait" />
     </application>

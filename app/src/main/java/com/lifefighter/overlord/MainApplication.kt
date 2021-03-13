@@ -1,6 +1,7 @@
 package com.lifefighter.overlord
 
 import android.app.Application
+import com.lifefighter.overlord.db.AppDatabaseModule
 import com.lifefighter.overlord.net.AppInterfaceModule
 import com.lifefighter.utils.LogUtils
 import com.lifefighter.utils.NetUtils
@@ -21,8 +22,9 @@ class MainApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@MainApplication)
-            modules(NetUtils.netClientModule, AppInterfaceModule.module)
+            modules(NetUtils.module, AppInterfaceModule.module)
             modules(PageInjectModule.module)
+            modules(AppDatabaseModule.module)
         }
     }
 }

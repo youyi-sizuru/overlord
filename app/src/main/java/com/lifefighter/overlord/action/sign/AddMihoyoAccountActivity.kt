@@ -1,10 +1,11 @@
 package com.lifefighter.overlord.action.sign
 
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.*
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.overlord.R
-import com.lifefighter.overlord.databinding.ActivityMihoyoAutoSignBinding
+import com.lifefighter.overlord.databinding.ActivityAddMihoyoAccountBinding
 import com.lifefighter.overlord.net.MihoyoInterface
 import com.lifefighter.overlord.net.MihoyoSignRequest
 import com.lifefighter.utils.logDebug
@@ -15,8 +16,8 @@ import kotlinx.coroutines.delay
  * @author xzp
  * @created on 2021/3/8.
  */
-class MihoyoAutoSignActivity : BaseActivity<ActivityMihoyoAutoSignBinding>() {
-    override fun getLayoutId(): Int = R.layout.activity_mihoyo_auto_sign
+class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>() {
+    override fun getLayoutId(): Int = R.layout.activity_add_mihoyo_account
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -31,13 +32,6 @@ class MihoyoAutoSignActivity : BaseActivity<ActivityMihoyoAutoSignBinding>() {
             override fun shouldOverrideUrlLoading(view: WebView, url: String?): Boolean {
                 view.loadUrl(url)
                 return true
-            }
-
-            override fun shouldInterceptRequest(
-                view: WebView?,
-                request: WebResourceRequest?
-            ): WebResourceResponse? {
-                return super.shouldInterceptRequest(view, request)
             }
         }
         viewBinding.web.settings.apply {
@@ -91,8 +85,8 @@ class MihoyoAutoSignActivity : BaseActivity<ActivityMihoyoAutoSignBinding>() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onLifecycleDestroy() {
+        (viewBinding.web.parent as ViewGroup).removeView(viewBinding.web)
         viewBinding.web.destroy()
     }
 }

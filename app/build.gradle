@@ -51,4 +51,6 @@ dependencies {
     implementation project(":base")
     implementation project(":utils")
     implementation project(":widget")
+    implementation libraries.database
+    kapt libraries.databaseCompiler
 }

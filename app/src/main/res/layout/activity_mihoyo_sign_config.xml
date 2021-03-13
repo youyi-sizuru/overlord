@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".action.sign.MihoyoSignConfigActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            app:menu="@menu/mihoyo_sign_config"
+            android:background="?colorPrimary"
+            app:titleTextColor="@color/white" />
+
+        <com.lifefighter.widget.refresh.ExRefreshLayout
+            android:id="@+id/refreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <com.scwang.smart.refresh.header.ClassicsHeader
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.lifefighter.widget.list.ExRecyclerView
+                android:id="@+id/listView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </com.lifefighter.widget.refresh.ExRefreshLayout>
+
+        <com.lifefighter.widget.button.ExButton
+            android:id="@+id/signButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_padding_horizontal"
+            android:layout_marginVertical="@dimen/default_padding_vertical"
+            android:text="启动自动签到"
+            android:textColor="@color/white"
+            app:shapeAppearance="@style/ExShapeAppearance.Stadium" />
+    </LinearLayout>
+</layout>

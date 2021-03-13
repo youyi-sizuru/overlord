@@ -1,6 +1,7 @@
 package com.lifefighter.overlord
 
-import com.lifefighter.overlord.action.sign.MihoyoAutoSignActivity
+import com.lifefighter.overlord.action.sign.AddMihoyoAccountActivity
+import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
 import org.koin.dsl.module
 
 /**
@@ -10,6 +11,7 @@ import org.koin.dsl.module
 object PageInjectModule {
     val module = module {
         scope<MainActivity> { }
-        scope<MihoyoAutoSignActivity> { }
+        scope<AddMihoyoAccountActivity> { }
+        scope<MihoyoSignConfigActivity> { }
     }
 }

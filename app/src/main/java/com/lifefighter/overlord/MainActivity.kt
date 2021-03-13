@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.string
-import com.lifefighter.overlord.action.sign.MihoyoAutoSignActivity
+import com.lifefighter.overlord.action.sign.AddMihoyoAccountActivity
 import com.lifefighter.overlord.databinding.ActivityMainBinding
 import com.lifefighter.overlord.databinding.MainToolItemBinding
 import com.lifefighter.overlord.model.ToolData
@@ -33,7 +33,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
     private fun onToolClick(binding: MainToolItemBinding, data: ToolData, position: Int) {
         when (data.id) {
             0L -> {
-                route(MihoyoAutoSignActivity::class)
+                route(AddMihoyoAccountActivity::class)
             }
         }
     }
