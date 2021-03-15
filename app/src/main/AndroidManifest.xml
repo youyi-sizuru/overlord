@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.lifefighter.overlord">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -31,6 +32,11 @@
             android:name=".action.sign.MihoyoSignConfigActivity"
             android:label="@string/mihoyo_auto_sign_title"
             android:screenOrientation="portrait" />
+
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            tools:node="remove" />
     </application>
 
 </manifest>

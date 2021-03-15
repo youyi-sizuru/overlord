@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.qualifier.StringQualifier
 import org.koin.dsl.module
 import retrofit2.Converter

@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.webkit.*
 import com.lifefighter.base.BaseActivity
+import com.lifefighter.base.withLoadingDialog
 import com.lifefighter.overlord.R
 import com.lifefighter.overlord.databinding.ActivityAddMihoyoAccountBinding
+import com.lifefighter.overlord.db.MihoyoAccount
+import com.lifefighter.overlord.db.MihoyoAccountDao
 import com.lifefighter.overlord.net.MihoyoInterface
-import com.lifefighter.overlord.net.MihoyoSignRequest
-import com.lifefighter.utils.logDebug
-import com.lifefighter.utils.toJsonOrEmpty
-import kotlinx.coroutines.delay
+import com.lifefighter.utils.EventBusManager
+import com.lifefighter.utils.orZero
+import com.lifefighter.utils.toast
+
 
 /**
  * @author xzp
@@ -19,21 +22,6 @@ import kotlinx.coroutines.delay
 class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>() {
     override fun getLayoutId(): Int = R.layout.activity_add_mihoyo_account
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
-        setSupportActionBar(viewBinding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        viewBinding.toolbar.setNavigationOnClickListener {
-            finish()
-        }
-        viewBinding.web.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                startSign()
-            }
-
-            override fun shouldOverrideUrlLoading(view: WebView, url: String?): Boolean {
-                view.loadUrl(url)
-                return true
-            }
-        }
         viewBinding.web.settings.apply {
             userAgentString =
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
@@ -51,38 +39,54 @@ class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>()
             saveFormData = false
             useWideViewPort = true
         }
-        viewBinding.web.removeJavascriptInterface("searchBoxJavaBridge_")
-        viewBinding.web.scrollBarStyle = WebView.SCROLLBARS_OUTSIDE_OVERLAY
-        viewBinding.web.loadUrl("https://bbs.mihoyo.com/ys/")
+        CookieManager.getInstance().removeAllCookies(null)
+        CookieManager.getInstance().flush()
+        viewBinding.web.apply {
+            clearCache(true)
+            clearHistory()
+            removeJavascriptInterface("searchBoxJavaBridge_")
+            scrollBarStyle = WebView.SCROLLBARS_OUTSIDE_OVERLAY
+            loadUrl("https://bbs.mihoyo.com/ys/")
+        }
+        viewBinding.toolbar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.getAccountButton) {
+                startSign()
+            }
+            true
+        }
     }
 
     private fun startSign() {
         launch {
             val cookie = CookieManager.getInstance().getCookie("https://bbs.mihoyo.com").orEmpty()
             if (!cookie.contains("account_id")) {
+                toast("尚未登录，请登录后在获取账户")
                 return@launch
             }
             val mihoyoInterface = get<MihoyoInterface>()
-            val roleList = mihoyoInterface.getRoles(cookie = cookie).list
-            roleList?.forEach {
+            mihoyoInterface.getRoles(cookie = cookie).list?.map {
                 val signInfo =
                     mihoyoInterface.getSignInfo(
                         cookie = cookie,
                         region = it.region.orEmpty(),
                         uid = it.gameUid.orEmpty()
                     )
-                logDebug(signInfo.toJsonOrEmpty())
-                delay(1000)
-                val result = mihoyoInterface.signGenshin(
+                MihoyoAccount(
+                    uid = it.gameUid.orEmpty(),
+                    region = it.region.orEmpty(),
+                    nickname = it.nickname.orEmpty(),
+                    regionName = it.regionName.orEmpty(),
                     cookie = cookie,
-                    request = MihoyoSignRequest(
-                        region = it.region.orEmpty(),
-                        uid = it.gameUid.orEmpty()
-                    )
+                    lastSignDay = if (signInfo.sign != true) 0 else System.currentTimeMillis(),
+                    signDays = signInfo.totalSignDay.orZero()
                 )
-                logDebug(result.toString())
+            }?.let {
+                get<MihoyoAccountDao>().add(*it.toTypedArray())
             }
-        }
+            toast("添加账户成功")
+            EventBusManager.post(MihoyoAccountAddEvent())
+            finish()
+        }.withLoadingDialog(this)
     }
 
     override fun onLifecycleDestroy() {
@@ -90,3 +94,5 @@ class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>()
         viewBinding.web.destroy()
     }
 }
+
+class MihoyoAccountAddEvent

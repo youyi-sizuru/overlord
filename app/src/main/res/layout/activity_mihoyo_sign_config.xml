@@ -10,12 +10,13 @@
         android:fitsSystemWindows="true"
         android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.lifefighter.widget.bar.ExToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
-            app:menu="@menu/mihoyo_sign_config"
             android:background="?colorPrimary"
+            app:menu="@menu/mihoyo_sign_config"
+            app:title="@string/mihoyo_auto_sign_title"
             app:titleTextColor="@color/white" />
 
         <com.lifefighter.widget.refresh.ExRefreshLayout

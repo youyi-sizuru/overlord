@@ -3,17 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
-        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
         android:orientation="vertical">
 
         <com.lifefighter.widget.bar.ExToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:background="?colorPrimary"
-            app:titleTextColor="@color/white" />
+            android:layout_height="wrap_content"
+            app:menu="@menu/add_mihoyo_account"
+            app:title="@string/add_mihoyo_account_title" />
 
         <com.lifefighter.widget.web.ExWebView
             android:id="@+id/web"

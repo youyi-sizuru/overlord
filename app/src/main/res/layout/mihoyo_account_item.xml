@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="m"
+            type="com.lifefighter.overlord.action.sign.MihoyoAccountItemModel" />
+    </data>
+
+    <com.lifefighter.widget.card.ExCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_padding_horizontal"
+        android:layout_marginVertical="@dimen/default_padding_vertical"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <com.lifefighter.widget.card.ExCardView
+                android:id="@+id/logoView"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                app:cardBackgroundColor="?colorPrimary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearance="@style/ExShapeAppearance.Stadium">
+
+                <com.lifefighter.widget.text.ExText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@{m.logoText}"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    tools:text="肝" />
+            </com.lifefighter.widget.card.ExCardView>
+
+            <com.lifefighter.widget.text.ExText
+                android:id="@+id/nameView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:singleLine="true"
+                android:text="@{m.name}"
+                android:textColor="?android:textColorPrimary"
+                app:layout_constraintBottom_toTopOf="@+id/messageView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/logoView"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="肝帝" />
+
+            <com.lifefighter.widget.text.ExText
+                android:id="@+id/messageView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:singleLine="true"
+                android:text="@{m.signMessage}"
+                android:textColor="?android:textColorSecondary"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/nameView"
+                app:layout_constraintStart_toStartOf="@+id/nameView"
+                app:layout_constraintTop_toBottomOf="@+id/nameView"
+                tools:text="本月已经签到27天" />
+
+            <com.lifefighter.widget.card.ExCardView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:rotation="30"
+                app:cardBackgroundColor="@color/transparent"
+                app:goneIfNot="@{m.todaySigned}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearance="@style/ExShapeAppearance.Stadium"
+                app:strokeColor="?colorPrimary"
+                app:strokeWidth="1dp">
+
+                <com.lifefighter.widget.text.ExText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="?colorPrimary"
+                    android:textSize="16sp"
+                    android:text="签" />
+            </com.lifefighter.widget.card.ExCardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.lifefighter.widget.card.ExCardView>
+
+</layout>

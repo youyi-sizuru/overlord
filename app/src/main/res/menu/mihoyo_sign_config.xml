@@ -2,8 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/signButton"
+        android:title="立即签到"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/addAccountButton"
         android:icon="@mipmap/ic_add_white"
         android:title="@string/add"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 </menu>
