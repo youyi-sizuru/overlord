@@ -4,6 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".action.sign.MihoyoSignConfigActivity">
 
+    <data>
+
+        <variable
+            name="m"
+            type="com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity.Model" />
+    </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,8 +49,9 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/default_padding_horizontal"
             android:layout_marginVertical="@dimen/default_padding_vertical"
-            android:text="启动自动签到"
+            android:text="@{m.signEnabledTextData}"
             android:textColor="@color/white"
-            app:shapeAppearance="@style/ExShapeAppearance.Stadium" />
+            app:shapeAppearance="@style/ExShapeAppearance.Stadium"
+            tools:text="启用自动签到" />
     </LinearLayout>
 </layout>

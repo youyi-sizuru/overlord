@@ -1,6 +1,8 @@
 package com.lifefighter.overlord.net
 
+import androidx.work.WorkerParameters
 import com.google.gson.JsonIOException
+import com.lifefighter.overlord.action.sign.SignWork
 import com.lifefighter.overlord.model.MihoyoData
 import com.lifefighter.utils.JsonUtils
 import com.lifefighter.utils.logDebug
@@ -43,6 +45,9 @@ object AppInterfaceModule {
         }
         single {
             get<Retrofit>(MIHOYO_QUALIFIER).create(MihoyoInterface::class.java)
+        }
+        worker { (workerParameters: WorkerParameters) ->
+            SignWork(get(), get(), get(), workerParameters)
         }
     }
 }

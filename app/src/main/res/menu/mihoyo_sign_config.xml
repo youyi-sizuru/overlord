@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/signButton"
+        android:id="@+id/signMenuButton"
         android:title="立即签到"
         app:showAsAction="ifRoom" />
     <item

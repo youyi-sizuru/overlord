@@ -17,14 +17,11 @@ import com.lifefighter.overlord.db.MihoyoAccountDao
 import com.lifefighter.overlord.net.MihoyoException
 import com.lifefighter.overlord.net.MihoyoInterface
 import com.lifefighter.overlord.net.MihoyoSignRequest
-import com.lifefighter.utils.orZero
-import com.lifefighter.utils.toast
-import com.lifefighter.utils.ui
+import com.lifefighter.utils.*
 import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import org.koin.java.KoinJavaComponent.getKoin
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,13 +31,16 @@ import java.util.concurrent.TimeUnit
 class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>() {
     override fun getLayoutId(): Int = R.layout.activity_mihoyo_sign_config
     private val adapter = DataBindingAdapter()
+    private lateinit var model: Model
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
+        model = Model()
+        viewBinding.m = model
         viewBinding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.addAccountButton -> {
                     route(AddMihoyoAccountActivity::class)
                 }
-                R.id.signButton -> {
+                R.id.signMenuButton -> {
                     signAllAccount()
                 }
             }
@@ -71,7 +71,7 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
         }
 
         viewBinding.signButton.setOnClickListener {
-            SignWork.startWork(rootContext)
+            model.switchSignEnabled()
         }
     }
 
@@ -99,6 +99,7 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
                         cookie = account.cookie,
                         request = MihoyoSignRequest(region = account.region, uid = account.uid)
                     )
+                    toast("恭喜${account.nickname}签到成功")
                 } catch (e: MihoyoException) {
                     when (e.code) {
                         AppConst.MIHOYO_ALREADY_SIGN_CODE -> {
@@ -124,6 +125,31 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
             viewBinding.refreshLayout.autoRefresh()
         }.withLoadingDialog(this)
     }
+
+    inner class Model {
+        private val signWorkRunningData = ExLiveData(false)
+        val signEnabledTextData = signWorkRunningData.map {
+            if (it.orFalse()) {
+                "禁用自动签到"
+            } else {
+                "启用自动签到"
+            }
+        }
+
+        init {
+            signWorkRunningData.value =
+                !WorkManagerUtils.isRequestFinishedByTag(rootContext, SignWork.TAG)
+        }
+
+        fun switchSignEnabled() {
+            if (signWorkRunningData.value.orFalse()) {
+                WorkManager.getInstance(rootContext).cancelAllWorkByTag(SignWork.TAG)
+            } else {
+                SignWork.startWork(rootContext)
+            }
+            signWorkRunningData.value = !signWorkRunningData.value.orFalse()
+        }
+    }
 }
 
 class MihoyoAccountItemModel(account: MihoyoAccount) {
@@ -133,12 +159,14 @@ class MihoyoAccountItemModel(account: MihoyoAccount) {
     val logoText = account.nickname.firstOrNull()?.toString() ?: "?"
 }
 
-class SignWork(context: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(context, workerParams) {
+class SignWork(
+    context: Context,
+    private val accountDao: MihoyoAccountDao,
+    private val mihoyoInterface: MihoyoInterface,
+    workerParams: WorkerParameters
+) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         try {
-            val accountDao = getKoin().get<MihoyoAccountDao>()
-            val mihoyoInterface = getKoin().get<MihoyoInterface>()
             accountDao.getAll().filter {
                 !it.todaySigned
             }.forEach {
@@ -188,8 +216,6 @@ class SignWork(context: Context, workerParams: WorkerParameters) :
     }
 
     private suspend fun updateAccountInfo(account: MihoyoAccount) {
-        val accountDao = getKoin().get<MihoyoAccountDao>()
-        val mihoyoInterface = getKoin().get<MihoyoInterface>()
         val signInfo = mihoyoInterface.getSignInfo(
             cookie = account.cookie,
             region = account.region,
@@ -204,11 +230,12 @@ class SignWork(context: Context, workerParams: WorkerParameters) :
     }
 
     companion object {
+        val TAG = SignWork::class.java.name
         fun startWork(context: Context) {
             val request = PeriodicWorkRequestBuilder<SignWork>(
-                2,
+                6,
                 TimeUnit.HOURS
-            ).addTag(SignWork::class.java.name).build()
+            ).addTag(TAG).build()
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(
                     AppConst.MIHOYO_SIGN_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP,

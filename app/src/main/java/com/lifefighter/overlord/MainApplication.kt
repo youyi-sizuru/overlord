@@ -7,6 +7,7 @@ import android.os.Build
 import com.lifefighter.overlord.action.sign.SignWork
 import com.lifefighter.overlord.db.AppDatabaseModule
 import com.lifefighter.overlord.net.AppInterfaceModule
+import com.lifefighter.utils.EventBusManager
 import com.lifefighter.utils.LogUtils
 import com.lifefighter.utils.NetUtils
 import com.lifefighter.utils.ToastUtils
@@ -30,10 +31,12 @@ class MainApplication : Application(), KoinComponent {
         super.onCreate()
         DataBindingHelper.DEFAULT_BINDING_VARIABLE = BR.m
         LogUtils.init()
+        EventBusManager.init()
         ToastUtils.init(this)
         startKoin {
             androidLogger()
             androidContext(this@MainApplication)
+            workManagerFactory()
             modules(NetUtils.module, AppInterfaceModule.module)
             modules(PageInjectModule.module)
             modules(AppDatabaseModule.module)
@@ -49,6 +52,5 @@ class MainApplication : Application(), KoinComponent {
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mihoyoChannel)
         }
-        SignWork.startWork(this)
     }
 }
