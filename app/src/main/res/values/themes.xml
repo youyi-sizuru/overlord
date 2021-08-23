@@ -4,7 +4,9 @@
     <style name="AppTheme" parent="BaseTheme">
         <item name="colorPrimary">#0071C1</item>
         <item name="colorPrimaryDark">#0020C1</item>
+        <item name="colorSurface">?colorPrimary</item>
         <item name="android:windowBackground">@color/white</item>
         <item name="android:statusBarColor">?colorPrimary</item>
+        <item name="colorBackgroundFloating">@color/white</item>
     </style>
 </resources>

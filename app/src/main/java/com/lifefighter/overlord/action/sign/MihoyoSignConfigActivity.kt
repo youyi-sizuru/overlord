@@ -2,10 +2,12 @@ package com.lifefighter.overlord.action.sign
 
 import android.content.Context
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.whenResumed
 import androidx.work.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.withLoadingDialog
 import com.lifefighter.overlord.AppConst
@@ -47,12 +49,23 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
             true
         }
         viewBinding.listView.adapter = adapter
-        adapter.addItemBinder(
-            ViewItemBinder<MihoyoAccountItemModel, MihoyoAccountItemBinding>(
-                R.layout.mihoyo_account_item,
-                this
-            )
+        val mihoyoItemBinder = ViewItemBinder<MihoyoAccountItemModel, MihoyoAccountItemBinding>(
+            R.layout.mihoyo_account_item,
+            this
         )
+        mihoyoItemBinder.onItemClick = { _, item, position ->
+            AlertDialog.Builder(this).setMessage("确定删除?")
+                .setPositiveButton("确定") { _, _ ->
+                    launch {
+                        val accountDao = get<MihoyoAccountDao>()
+                        accountDao.delete(item.account)
+                        adapter.removeAt(position)
+                    }
+                }
+                .setNegativeButton("取消", null)
+                .create().show()
+        }
+        adapter.addItemBinder(mihoyoItemBinder)
         viewBinding.refreshLayout.setOnRefreshListener { layout ->
             launch(failure = {
                 layout.finishRefresh(false)
@@ -152,7 +165,7 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
     }
 }
 
-class MihoyoAccountItemModel(account: MihoyoAccount) {
+class MihoyoAccountItemModel(val account: MihoyoAccount) {
     val name = "${account.nickname}(${account.regionName})"
     val todaySigned = account.todaySigned
     val signMessage = "本月已经签到${account.signDays}天"

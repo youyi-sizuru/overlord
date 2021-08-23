@@ -60,7 +60,7 @@ class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>()
         launch {
             val cookie = CookieManager.getInstance().getCookie("https://bbs.mihoyo.com").orEmpty()
             if (!cookie.contains("account_id")) {
-                toast("尚未登录，请登录后在获取账户")
+                toast("尚未登录，请登录后再获取账户")
                 return@launch
             }
             val mihoyoInterface = get<MihoyoInterface>()
