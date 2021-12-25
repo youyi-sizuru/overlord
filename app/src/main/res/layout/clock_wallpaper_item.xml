@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.lifefighter.widget.card.ExCardView
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        android:layout_margin="8dp"
+        app:cardBackgroundColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.lifefighter.overlord.action.wallpaper.ClockView
+                android:id="@+id/clockView"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1920:1080" />
+
+            <com.lifefighter.widget.text.ExText
+                android:textColor="@color/black"
+                android:text="@string/clock_wallpaper_desc"
+                android:gravity="center"
+                android:padding="8dp"
+                app:layout_constraintTop_toBottomOf="@id/clockView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.lifefighter.widget.card.ExCardView>
+
+</layout>

@@ -1,14 +1,20 @@
 package com.lifefighter.overlord
 
+import android.app.WallpaperManager
+import android.os.Build
 import android.os.Bundle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.string
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
+import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
 import com.lifefighter.overlord.databinding.ActivityMainBinding
 import com.lifefighter.overlord.databinding.MainToolItemBinding
 import com.lifefighter.overlord.model.ToolData
+import com.lifefighter.utils.orTrue
+import com.lifefighter.utils.toast
+import com.lifefighter.utils.tryOrNull
 import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
 
@@ -25,6 +31,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             }
         )
         adapter.addData(ToolData(0, string(R.string.mihoyo_auto_sign_title)))
+        adapter.addData(ToolData(1, string(R.string.wallpaper_title)))
         viewBinding.list.adapter = adapter
         viewBinding.list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
     }
@@ -33,6 +40,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         when (data.id) {
             0L -> {
                 route(MihoyoSignConfigActivity::class)
+            }
+            1L -> {
+                val wallpaperManager = WallpaperManager.getInstance(this)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    toast("系统版本过低，请更新系统至android 7.0以上")
+                    return
+                }
+                if (tryOrNull { wallpaperManager.isWallpaperSupported.not() }.orTrue()) {
+                    toast("该系统暂不支持壁纸服务")
+                    return
+                }
+                if (tryOrNull { wallpaperManager.isSetWallpaperAllowed.not() }.orTrue()) {
+                    toast("该系统暂不支持自定义壁纸")
+                    return
+                }
+                route(WallpaperActivity::class)
             }
         }
     }

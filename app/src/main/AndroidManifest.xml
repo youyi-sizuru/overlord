@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <application
         android:name=".MainApplication"
@@ -16,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:exported="true"
             android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -32,11 +34,26 @@
             android:name=".action.sign.MihoyoSignConfigActivity"
             android:label="@string/mihoyo_auto_sign_title"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".action.wallpaper.WallpaperActivity"
+            android:label="@string/wallpaper_title"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
+        <service
+            android:exported="true"
+            android:name=".action.wallpaper.ClockWallpaperService"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/clock_wallpaper" />
+        </service>
     </application>
 
 </manifest>
