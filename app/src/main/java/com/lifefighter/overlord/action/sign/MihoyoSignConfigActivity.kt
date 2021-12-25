@@ -7,7 +7,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.whenResumed
 import androidx.work.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.withLoadingDialog
 import com.lifefighter.overlord.AppConst
@@ -234,12 +233,27 @@ class SignWork(
             region = account.region,
             uid = account.uid
         )
-        accountDao.update(
-            account.copy(
-                lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
-                signDays = signInfo.totalSignDay.orZero()
+        val userInfo = tryOrNull {
+            mihoyoInterface.getRoles(account.cookie).list?.firstOrNull {
+                it.gameUid == account.uid && it.region == account.region
+            }
+        }
+        if (userInfo == null) {
+            accountDao.update(
+                account.copy(
+                    lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
+                    signDays = signInfo.totalSignDay.orZero()
+                )
             )
-        )
+        } else {
+            accountDao.update(
+                account.copy(
+                    nickname = userInfo.nickname.orEmpty(),
+                    lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
+                    signDays = signInfo.totalSignDay.orZero()
+                )
+            )
+        }
     }
 
     companion object {
