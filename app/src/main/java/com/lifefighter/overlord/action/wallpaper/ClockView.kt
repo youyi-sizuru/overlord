@@ -83,7 +83,7 @@ object ClockUtils {
         clockPaint.strokeWidth = minSize / 1080f * 10
         clockPaint.color = Color.WHITE
         canvas.save()
-        canvas.rotate((hour + minute / 60f) * 6f, centerX, centerY)
+        canvas.rotate((hour + minute / 12f) * 6f, centerX, centerY)
         canvas.drawLine(centerX, centerY, centerX, centerY - clockRadius * 0.6f, clockPaint)
         canvas.restore()
         clockPaint.color = Color.rgb(215, 216, 96)

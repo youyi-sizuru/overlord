@@ -20,7 +20,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="1920:1080" />
+                app:layout_constraintDimensionRatio="1080:1920" />
 
             <com.lifefighter.widget.text.ExText
                 android:textColor="@color/black"

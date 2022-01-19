@@ -2,6 +2,7 @@ package com.lifefighter.overlord
 
 import com.lifefighter.overlord.action.sign.AddMihoyoAccountActivity
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
+import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
 import org.koin.dsl.module
 
 /**
@@ -13,5 +14,6 @@ object PageInjectModule {
         scope<MainActivity> { }
         scope<AddMihoyoAccountActivity> { }
         scope<MihoyoSignConfigActivity> { }
+        scope<WallpaperActivity> { }
     }
 }

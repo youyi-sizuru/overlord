@@ -13,4 +13,8 @@ class ClockWallpaperService : CanvasWallpaperService() {
         ClockUtils.draw(canvas)
     }
 
+    override fun onOffset(xOffset: Float, yOffset: Float) {
+    }
+
+
 }
