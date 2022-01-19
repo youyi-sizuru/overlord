@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import com.lifefighter.overlord.action.sign.SignWork
 import com.lifefighter.overlord.db.AppDatabaseModule
 import com.lifefighter.overlord.net.AppInterfaceModule
 import com.lifefighter.utils.EventBusManager
@@ -12,6 +11,8 @@ import com.lifefighter.utils.LogUtils
 import com.lifefighter.utils.NetUtils
 import com.lifefighter.utils.ToastUtils
 import com.lifefighter.widget.adapter.DataBindingHelper
+import com.tencent.mmkv.MMKV
+import com.tencent.mmkv.MMKVLogLevel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -52,5 +53,9 @@ class MainApplication : Application(), KoinComponent {
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mihoyoChannel)
         }
+        MMKV.initialize(
+            this,
+            if (BuildConfig.DEBUG) MMKVLogLevel.LevelInfo else MMKVLogLevel.LevelError
+        )
     }
 }

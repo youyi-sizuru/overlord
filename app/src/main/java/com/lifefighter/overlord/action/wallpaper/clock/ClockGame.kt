@@ -1,32 +1,30 @@
-package com.lifefighter.overlord.action.wallpaper
+package com.lifefighter.overlord.action.wallpaper.clock
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Paint.ANTI_ALIAS_FLAG
-import android.util.AttributeSet
-import android.view.View
+import com.lifefighter.overlord.action.wallpaper.CanvasGame
 import java.util.*
 import kotlin.math.min
 
 /**
  * @author xzp
- * @created on 2021/12/25.
+ * @created on 2022/1/19.
  */
-class ClockView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
-    override fun onDraw(canvas: Canvas) {
-        ClockUtils.draw(canvas)
+class ClockGame : CanvasGame {
+    private val clockPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    override fun onStart() {
     }
-}
 
-object ClockUtils {
-    private val clockPaint = Paint(ANTI_ALIAS_FLAG)
+    override fun onEnd() {
+    }
+
+    override fun getName(): String {
+        return "时钟壁纸"
+    }
 
 
-    fun draw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         val minSize = min(canvas.width, canvas.height)
         if (minSize == 0) {
             return
@@ -105,5 +103,8 @@ object ClockUtils {
             centerY + clockRadius * 0.05f,
             clockPaint
         )
+    }
+
+    override fun onOffset(xOffset: Float, yOffset: Float) {
     }
 }

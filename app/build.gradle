@@ -59,6 +59,7 @@ android {
 dependencies {
     implementation libraries.kotlinLibraries
     implementation libraries.androidXLibraries
+    implementation libraries.mmkv
     implementation project(":base")
     implementation project(":utils")
     implementation project(":widget")

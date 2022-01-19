@@ -5,5 +5,5 @@
     <string name="add">添加</string>
     <string name="get_account_title">获取账户</string>
     <string name="wallpaper_title">壁纸服务</string>
-    <string name="clock_wallpaper_desc">时钟壁纸</string>
+    <string name="game_wallpaper_desc">游戏壁纸</string>
 </resources>

@@ -43,16 +43,17 @@
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
             tools:node="remove" />
+
         <service
             android:exported="true"
-            android:name=".action.wallpaper.ClockWallpaperService"
+            android:name=".action.wallpaper.GameWallpaperService"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/clock_wallpaper" />
+                android:resource="@xml/game_wallpaper" />
         </service>
     </application>
 
