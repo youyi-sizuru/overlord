@@ -2,7 +2,9 @@ package com.lifefighter.overlord.action.wallpaper.bricks
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.PointF
 import com.lifefighter.overlord.action.wallpaper.CanvasGame
+import kotlin.math.max
 
 /**
  * @author xzp
@@ -29,19 +31,22 @@ class BricksGame : CanvasGame {
     /**
      * 打砖块用的球
      */
-    private val ball: Ball = Ball(this)
+    val ball: Ball = Ball(this)
 
 
     /**
      * 打砖块下方的那个板子
      */
-    private val board: Board = Board(this)
+    val board: Board = Board(this)
+
+    private var lastOffsetX: Float? = 0f
 
     init {
         reset()
     }
 
     private fun reset() {
+        lastOffsetX = null
         board.reset()
         ball.reset()
     }
@@ -58,7 +63,7 @@ class BricksGame : CanvasGame {
      * 上一关
      */
     fun downLevel() {
-        updateLevel(this.level - 1)
+        updateLevel(max(0, this.level - 1))
     }
 
     /**
@@ -76,10 +81,17 @@ class BricksGame : CanvasGame {
         canvas.save()
         canvas.scale(canvas.width / width.toFloat(), canvas.height / height.toFloat())
         board.draw(canvas)
+        ball.draw(canvas)
         canvas.restore()
     }
 
     override fun onOffset(xOffset: Float, yOffset: Float) {
+        val lastOffsetX = lastOffsetX ?: xOffset
+        this.lastOffsetX = xOffset
+        board.offset((xOffset - lastOffsetX) * width)
+        if (xOffset != lastOffsetX) {
+            ball.start()
+        }
     }
 
     override fun onStart() {
@@ -92,4 +104,5 @@ class BricksGame : CanvasGame {
     override fun getName(): String {
         return "打砖块壁纸"
     }
+
 }

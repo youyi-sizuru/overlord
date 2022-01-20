@@ -16,11 +16,9 @@ class Board(private val game: BricksGame) {
      * 板子大小
      */
     private val rect = Rect(0, 0, 0, 0)
-    private var offsetX: Int = 0
-    val height
-        get() = rect.height()
+    private var offsetX = 0f
     val centerX
-        get() = rect.centerX() + offsetX
+        get() = rect.centerX()
     val top
         get() = rect.top
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -37,13 +35,18 @@ class Board(private val game: BricksGame) {
         rect.right = center + width / 2
         rect.bottom = game.height - game.height * (min(9, game.level) + 1) / 30
         rect.top = rect.bottom - game.width / 80
-        offsetX = 0
+        offsetX = 0f
     }
 
     fun draw(canvas: Canvas) {
         canvas.save()
-        canvas.translate(-offsetX.toFloat(), 0f)
+        canvas.translate(-offsetX, 0f)
         canvas.drawRect(rect, paint)
         canvas.restore()
+    }
+
+    fun offset(offsetX: Float) {
+        val max = (game.width - rect.width()) / 2f
+        this.offsetX = max(-max, min(max, this.offsetX + offsetX))
     }
 }
