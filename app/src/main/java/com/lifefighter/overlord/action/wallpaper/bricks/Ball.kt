@@ -71,8 +71,10 @@ class Ball(private val game: BricksGame) {
     }
 
     fun start() {
-        speed = game.width * (game.level / 2 + 1) / 5f
-        angle = 315f
+        if(isStart.not()) {
+            speed = game.width * (game.level / 2 + 1) / 5f
+            angle = 315f
+        }
     }
 
     fun move() {
