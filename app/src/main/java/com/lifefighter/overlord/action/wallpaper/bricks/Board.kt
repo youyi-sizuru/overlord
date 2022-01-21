@@ -40,7 +40,7 @@ class Board(private val game: BricksGame) {
 
     fun draw(canvas: Canvas) {
         canvas.save()
-        canvas.translate(-offsetX, 0f)
+        canvas.translate(offsetX, 0f)
         canvas.drawRect(rect, paint)
         canvas.restore()
     }

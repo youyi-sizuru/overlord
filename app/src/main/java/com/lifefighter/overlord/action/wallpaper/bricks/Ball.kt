@@ -33,8 +33,8 @@ class Ball(private val game: BricksGame) : TimerTask() {
     /**
      * 小球移动的角度
      */
-    private var angle = 0f
-
+    var angle = 0f
+        private set
     val left
         get() = rect.left + offsetX
     val right
@@ -66,7 +66,7 @@ class Ball(private val game: BricksGame) : TimerTask() {
             rect.top = rect.bottom - size
             rect.left = game.board.centerX - size / 2
             rect.right = rect.left + size
-            speed = game.width * (game.level + 1) / 20f
+            speed = game.width * (game.level + 1) / 10f
             lastMoveTime = null
             angle = 0f
         }
@@ -75,7 +75,7 @@ class Ball(private val game: BricksGame) : TimerTask() {
     fun draw(canvas: Canvas) {
         synchronized(this) {
             canvas.save()
-            canvas.translate(-offsetX, -offsetY)
+            canvas.translate(offsetX, offsetY)
             canvas.drawOval(rect, paint)
             canvas.restore()
         }
@@ -86,7 +86,7 @@ class Ball(private val game: BricksGame) : TimerTask() {
             return
         }
         synchronized(this) {
-            angle = 135f
+            angle = 315f
             moveTimer = Timer().also {
                 it.schedule(this, 0, 20)
             }
@@ -98,9 +98,23 @@ class Ball(private val game: BricksGame) : TimerTask() {
             val now = System.currentTimeMillis()
             val preTime = lastMoveTime ?: now
             lastMoveTime = now
-            val moved = (now - preTime) * speed / 1000
-            offsetX += moved * cos(Math.toRadians(angle.toDouble())).toFloat()
-            offsetY += moved * sin(Math.toRadians(angle.toDouble())).toFloat()
+            var moved = (now - preTime) * speed / 1000
+            while (true) {
+                val collisionMove = game.calculateCollisionMove(this)
+                if (collisionMove.move > moved) {
+                    offsetX += moved * cos(Math.toRadians(angle.toDouble())).toFloat()
+                    offsetY += moved * sin(Math.toRadians(angle.toDouble())).toFloat()
+                    break
+                }
+                offsetX += collisionMove.move * cos(Math.toRadians(angle.toDouble())).toFloat()
+                offsetY += collisionMove.move * sin(Math.toRadians(angle.toDouble())).toFloat()
+                angle = if (collisionMove.vertical) {
+                    (180 - angle + 360) % 360
+                } else {
+                    360 - angle
+                }
+                moved -= collisionMove.move
+            }
         }
     }
 }
