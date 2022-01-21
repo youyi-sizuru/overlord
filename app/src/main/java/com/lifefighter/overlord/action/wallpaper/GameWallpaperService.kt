@@ -20,6 +20,7 @@ class GameWallpaperService : CanvasWallpaperService() {
                 MMKV.defaultMMKV().getString(AppConst.GAME_TYPE, ClockGame::class.java.name)!!
             ).newInstance() as? CanvasGame
         } ?: ClockGame()
+        game?.onStart()
     }
 
     override fun onDraw(canvas: Canvas) {

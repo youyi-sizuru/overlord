@@ -4,6 +4,8 @@ import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.overlord.AppConst
 import com.lifefighter.overlord.R
@@ -41,7 +43,16 @@ class WallpaperActivity : BaseActivity<WallpaperBinding>() {
             }
         )
         adapter.addData(CanvasModel(ClockGame()))
-        adapter.addData(CanvasModel(BricksGame()))
+        adapter.addData(CanvasModel(BricksGame().also {
+            it.onStart()
+            it.onOffset(0f, 0f)
+            it.onOffset(0.1f, 0f)
+            this.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    it.onEnd()
+                }
+            })
+        }))
     }
 
     private fun startWallpaper() {

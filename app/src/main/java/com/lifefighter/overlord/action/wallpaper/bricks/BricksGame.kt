@@ -2,6 +2,8 @@ package com.lifefighter.overlord.action.wallpaper.bricks
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.os.Handler
+import android.os.HandlerThread
 import com.lifefighter.overlord.action.wallpaper.CanvasGame
 import kotlin.math.cos
 import kotlin.math.max
@@ -42,22 +44,39 @@ class BricksGame : CanvasGame {
 
     private var lastOffsetX: Float? = 0f
 
-    init {
-        reset()
-    }
+    /**
+     * 用来计算的线程
+     */
+    private var ioThread: HandlerThread? = null
+
+    /**
+     * 消息发送机器
+     */
+    private var messageHandler: Handler? = null
+
 
     private fun reset() {
-        lastOffsetX = null
-        board.reset()
-        ball.reset()
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                lastOffsetX = null
+                board.reset()
+                ball.reset()
+            }
+        }
+
     }
 
     /**
      * 重置关卡
      */
     fun updateLevel(level: Int) {
-        this.level = level
-        reset()
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                this.level = level
+                reset()
+            }
+        }
+
     }
 
     /**
@@ -78,28 +97,51 @@ class BricksGame : CanvasGame {
      * 开始绘制
      */
     override fun onDraw(canvas: Canvas) {
-        canvas.drawColor(Color.BLACK)
-        canvas.save()
-        canvas.scale(canvas.width / width.toFloat(), canvas.height / height.toFloat())
-        board.draw(canvas)
-        ball.draw(canvas)
-        canvas.restore()
+        synchronized(this@BricksGame) {
+            canvas.drawColor(Color.BLACK)
+            canvas.save()
+            canvas.scale(canvas.width / width.toFloat(), canvas.height / height.toFloat())
+            board.draw(canvas)
+            ball.draw(canvas)
+            canvas.restore()
+            calculate()
+        }
+    }
+
+    private fun calculate() {
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                ball.move()
+            }
+        }
     }
 
     override fun onOffset(xOffset: Float, yOffset: Float) {
-        val lastOffsetX = lastOffsetX ?: xOffset
-        this.lastOffsetX = xOffset
-        board.offset((xOffset - lastOffsetX) * -width)
-        if (xOffset != lastOffsetX) {
-            ball.start()
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                val lastOffsetX = lastOffsetX ?: xOffset
+                this.lastOffsetX = xOffset
+                board.offset((xOffset - lastOffsetX) * -width)
+                if (xOffset != lastOffsetX) {
+                    ball.start()
+                }
+            }
         }
     }
 
     override fun onStart() {
+        ioThread = HandlerThread("bricks").also {
+            it.start()
+            messageHandler = Handler(it.looper)
+        }
         reset()
     }
 
     override fun onEnd() {
+        messageHandler?.removeCallbacksAndMessages(null)
+        messageHandler = null
+        ioThread?.quit()
+        ioThread = null
     }
 
     override fun getName(): String {
@@ -131,24 +173,3 @@ class BricksGame : CanvasGame {
     }
 }
 
-/**
- * 碰撞移动距离
- * [move] 移动距离
- * [vertical]是否撞击到垂直方向
- */
-class CollisionMove(val move: Float, val vertical: Boolean = false) : Comparable<CollisionMove> {
-    override fun compareTo(other: CollisionMove): Int {
-        return when {
-            move > other.move -> {
-                1
-            }
-            move < other.move -> {
-                -1
-            }
-            else -> {
-                vertical.compareTo(other.vertical)
-            }
-        }
-    }
-
-}

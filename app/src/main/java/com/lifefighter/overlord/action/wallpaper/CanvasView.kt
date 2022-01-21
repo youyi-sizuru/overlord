@@ -17,5 +17,6 @@ class CanvasView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         canvasPainter?.onDraw(canvas)
+        this.postInvalidateDelayed(20)
     }
 }
