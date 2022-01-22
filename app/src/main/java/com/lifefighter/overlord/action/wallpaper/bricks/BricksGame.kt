@@ -5,25 +5,25 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.HandlerThread
 import com.lifefighter.overlord.action.wallpaper.CanvasGame
-import kotlin.math.cos
 import kotlin.math.max
-import kotlin.math.sin
 
 /**
  * @author xzp
  * @created on 2022/1/19.
  */
-class BricksGame : CanvasGame {
+class BricksGame : CanvasGame, DrawAble, ResetAble {
 
     /**
      * 游戏面板适配宽度
      */
-    val width = 1080
+    val width
+        get() = wall.width
 
     /**
      * 游戏面板适配高度
      */
-    val height = 1920
+    val height
+        get() = wall.height
 
     /**
      * 游戏等级
@@ -42,6 +42,10 @@ class BricksGame : CanvasGame {
      */
     val board: Board = Board(this)
 
+    val wall: Wall = Wall()
+
+    val bricks = Bricks(this)
+
     private var lastOffsetX: Float? = 0f
 
     /**
@@ -55,15 +59,17 @@ class BricksGame : CanvasGame {
     private var messageHandler: Handler? = null
 
 
-    private fun reset() {
+    override fun reset() {
+        messageHandler?.removeCallbacksAndMessages(null)
         messageHandler?.post {
             synchronized(this@BricksGame) {
                 lastOffsetX = null
+                wall.reset()
                 board.reset()
                 ball.reset()
+                bricks.reset()
             }
         }
-
     }
 
     /**
@@ -100,9 +106,24 @@ class BricksGame : CanvasGame {
         synchronized(this@BricksGame) {
             canvas.drawColor(Color.BLACK)
             canvas.save()
-            canvas.scale(canvas.width / width.toFloat(), canvas.height / height.toFloat())
-            board.draw(canvas)
-            ball.draw(canvas)
+            if (canvas.width < width || canvas.height < height) {
+                val scale =
+                    1 / max(width.toFloat() / canvas.width, height.toFloat() / canvas.height)
+                canvas.scale(scale, scale)
+                canvas.translate(
+                    (canvas.width - width.toFloat() * scale) / 2,
+                    (canvas.height - height.toFloat() * scale) / 2
+                )
+            } else {
+                canvas.translate(
+                    (canvas.width - width.toFloat()) / 2,
+                    (canvas.height - height.toFloat()) / 2
+                )
+            }
+            wall.onDraw(canvas)
+            board.onDraw(canvas)
+            bricks.onDraw(canvas)
+            ball.onDraw(canvas)
             canvas.restore()
             calculate()
         }
@@ -112,6 +133,9 @@ class BricksGame : CanvasGame {
         messageHandler?.post {
             synchronized(this@BricksGame) {
                 ball.move()
+                if (bricks.isWin()) {
+                    upLevel()
+                }
             }
         }
     }
@@ -152,23 +176,8 @@ class BricksGame : CanvasGame {
      * 计算小球移动后撞击到其他物体上的需要多长的距离
      */
     fun calculateCollisionMove(ball: Ball): CollisionMove {
-        var minMove = CollisionMove(Float.MAX_VALUE)
-        val angle = Math.toRadians(ball.angle.toDouble()).toFloat()
-        //X轴方向移动系数
-        val cos = cos(angle)
-        //Y轴方向移动系数
-        val sin = sin(angle)
-        if (cos > 0) {
-            minMove = minOf(minMove, CollisionMove((width - ball.right) / cos, true))
-
-        } else if (cos < 0) {
-            minMove = minOf(minMove, CollisionMove((ball.left / -cos), true))
-        }
-        if (sin > 0) {
-            minMove = minOf(minMove, CollisionMove((height - ball.bottom) / sin))
-        } else if (sin < 0) {
-            minMove = minOf(minMove, CollisionMove(ball.top / -sin))
-        }
+        var minMove = wall.calculateCollisionMove(ball)
+        minMove = minOf(minMove, board.calculateCollisionMove(ball))
         return minMove
     }
 }

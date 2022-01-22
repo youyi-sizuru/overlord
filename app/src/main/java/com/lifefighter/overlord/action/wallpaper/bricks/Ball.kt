@@ -1,18 +1,16 @@
 package com.lifefighter.overlord.action.wallpaper.bricks
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 
 /**
  * @author xzp
  * @created on 2022/1/19.
  */
-class Ball(private val game: BricksGame) {
+class Ball(private val game: BricksGame) : DrawAble, ResetAble {
 
     /**
      * 球所在的点
@@ -42,6 +40,21 @@ class Ball(private val game: BricksGame) {
     val bottom
         get() = rect.bottom + offsetY
 
+    /**
+     * 球半径
+     */
+    val radius
+        get() = rect.height() / 2f
+
+    /**
+     * 球中心点
+     */
+    val centerPoint
+        get() = PointF(rect.centerX() + offsetX, rect.centerY() + offsetY)
+
+    /**
+     * 球是否在运动
+     */
     val isStart
         get() = speed > 0
 
@@ -50,11 +63,11 @@ class Ball(private val game: BricksGame) {
         paint.color = Color.RED
     }
 
-    fun reset() {
+    override fun reset() {
         offsetX = 0f
         offsetY = 0f
         val size = game.width * max(1, 10 - game.level) / 100f
-        rect.bottom = game.board.top + 1f
+        rect.bottom = game.board.top - 1f
         rect.top = rect.bottom - size
         rect.left = game.board.centerX - size / 2
         rect.right = rect.left + size
@@ -63,7 +76,7 @@ class Ball(private val game: BricksGame) {
         angle = 0f
     }
 
-    fun draw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         canvas.save()
         canvas.translate(offsetX, offsetY)
         canvas.drawOval(rect, paint)
@@ -71,7 +84,7 @@ class Ball(private val game: BricksGame) {
     }
 
     fun start() {
-        if(isStart.not()) {
+        if (isStart.not()) {
             speed = game.width * (game.level / 2 + 1) / 5f
             angle = 315f
         }
@@ -94,12 +107,73 @@ class Ball(private val game: BricksGame) {
             }
             offsetX += collisionMove.move * cos(Math.toRadians(angle.toDouble())).toFloat()
             offsetY += collisionMove.move * sin(Math.toRadians(angle.toDouble())).toFloat()
-            angle = if (collisionMove.vertical) {
-                (180 - angle + 360) % 360
-            } else {
-                360 - angle
-            }
+            angle =
+                if (collisionMove.direction == CollisionDirection.LEFT || collisionMove.direction == CollisionDirection.RIGHT) {
+                    (180 - angle + 360) % 360
+                } else {
+                    360 - angle
+                }
             moved -= collisionMove.move
+            if (collisionMove.isDead()) {
+                game.reset()
+                break
+            }
+            collisionMove.block.afterCollision()
         }
+    }
+
+    fun calculateCollisionMove(rectF: RectF, direction: CollisionDirection): Float {
+        val angle = Math.toRadians(angle.toDouble()).toFloat()
+        //X轴方向移动系数
+        val cos = cos(angle)
+        //Y轴方向移动系数
+        val sin = sin(angle)
+        //要想撞到顶部区域，Y轴移动必须是正的，其他方向以此类推
+        if (direction == CollisionDirection.TOP && sin <= 0) {
+            return Float.MAX_VALUE
+        }
+        if (direction == CollisionDirection.BOTTOM && sin >= 0) {
+            return Float.MAX_VALUE
+        }
+        if (direction == CollisionDirection.LEFT && cos >= 0) {
+            return Float.MAX_VALUE
+        }
+        if (direction == CollisionDirection.RIGHT && cos <= 0) {
+            return Float.MAX_VALUE
+        }
+        val centerPoint = this.centerPoint
+        val toLeft = rectF.left - centerPoint.x
+        val toRight = rectF.right - centerPoint.x
+        val toTop = rectF.top - centerPoint.y
+        val toBottom = rectF.bottom - centerPoint.y
+        if (toLeft >= 0 && cos <= 0) {
+            return Float.MAX_VALUE
+        }
+        if (toRight <= 0 && cos >= 0) {
+            return Float.MAX_VALUE
+        }
+        if (toTop >= 0 && sin <= 0) {
+            return Float.MAX_VALUE
+        }
+        if (toBottom <= 0 && sin >= 0) {
+            return Float.MAX_VALUE
+        }
+        val distanceX: Pair<Float, Float> = when {
+            cos == 0f -> Pair(0f, Float.MAX_VALUE)
+            toLeft >= 0 -> Pair(toLeft / cos, toRight / cos)
+            toRight <= 0 -> Pair(toRight / cos, toLeft / cos)
+            cos > 0 -> Pair(0f, toRight / cos)
+            else -> Pair(0f, toLeft / cos)
+        }
+        val distanceY: Pair<Float, Float> = when {
+            sin == 0f -> Pair(0f, Float.MAX_VALUE)
+            toTop >= 0 -> Pair(toTop / sin, toBottom / sin)
+            toBottom <= 0 -> Pair(toBottom / sin, toTop / sin)
+            sin > 0 -> Pair(0f, toBottom / sin)
+            else -> Pair(0f, toTop / sin)
+        }
+        val min = max(distanceX.first, distanceY.first)
+        val max = min(distanceX.second, distanceY.second)
+        return if (max < min) Float.MAX_VALUE else min
     }
 }

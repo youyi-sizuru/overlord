@@ -46,7 +46,7 @@ class WallpaperActivity : BaseActivity<WallpaperBinding>() {
         adapter.addData(CanvasModel(BricksGame().also {
             it.onStart()
             it.onOffset(0f, 0f)
-            it.onOffset(0.1f, 0f)
+            it.onOffset(-1f, 0f)
             this.lifecycle.addObserver(LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_DESTROY) {
                     it.onEnd()

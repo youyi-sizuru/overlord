@@ -1,9 +1,6 @@
 package com.lifefighter.overlord.action.wallpaper.bricks
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -11,7 +8,7 @@ import kotlin.math.min
  * @author xzp
  * @created on 2022/1/19.
  */
-class Board(private val game: BricksGame) {
+class Board(private val game: BricksGame) : DrawAble, ResetAble, CollisionBlock {
     /**
      * 板子大小
      */
@@ -28,7 +25,7 @@ class Board(private val game: BricksGame) {
         paint.style = Paint.Style.FILL
     }
 
-    fun reset() {
+    override fun reset() {
         val width = game.width * max(1, (10 - game.level)) / 20
         val center = game.width / 2
         rect.left = center - width / 2
@@ -38,7 +35,7 @@ class Board(private val game: BricksGame) {
         offsetX = 0f
     }
 
-    fun draw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas) {
         canvas.save()
         canvas.translate(offsetX, 0f)
         canvas.drawRect(rect, paint)
@@ -48,5 +45,23 @@ class Board(private val game: BricksGame) {
     fun offset(offsetX: Float) {
         val max = (game.width - rect.width()) / 2f
         this.offsetX = max(-max, min(max, this.offsetX + offsetX))
+    }
+
+    override fun isDead(direction: CollisionDirection): Boolean {
+        return false
+    }
+
+    override fun calculateCollisionMove(ball: Ball): CollisionMove {
+        val topRect = RectF(
+            rect.left.toFloat() + offsetX,
+            rect.top.toFloat() - ball.radius,
+            rect.right.toFloat() + offsetX,
+            rect.top.toFloat()
+        )
+        return CollisionMove(
+            this,
+            ball.calculateCollisionMove(topRect, CollisionDirection.TOP),
+            CollisionDirection.TOP
+        )
     }
 }
