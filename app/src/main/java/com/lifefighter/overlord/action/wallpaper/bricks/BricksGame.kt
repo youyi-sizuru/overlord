@@ -59,7 +59,7 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
      */
     private var messageHandler: Handler? = null
 
-
+    private var paused = false
     override fun reset() {
         messageHandler?.removeCallbacksAndMessages(null)
         messageHandler?.post {
@@ -105,6 +105,9 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
      */
     override fun onDraw(canvas: Canvas) {
         synchronized(this@BricksGame) {
+            if (paused) {
+                return@synchronized
+            }
             canvas.drawColor(Color.BLACK)
             canvas.save()
             if (canvas.width < width || canvas.height < height) {
@@ -163,6 +166,24 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
             messageHandler = Handler(it.looper)
         }
         reset()
+    }
+
+    override fun onResume() {
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                ball.resume()
+                paused = false
+            }
+        }
+    }
+
+    override fun onPause() {
+        messageHandler?.post {
+            synchronized(this@BricksGame) {
+                paused = true
+                ball.pause()
+            }
+        }
     }
 
     override fun onEnd(context: Context) {

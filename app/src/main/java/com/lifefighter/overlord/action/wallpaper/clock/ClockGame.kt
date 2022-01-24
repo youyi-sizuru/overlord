@@ -1,6 +1,5 @@
 package com.lifefighter.overlord.action.wallpaper.clock
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -14,18 +13,16 @@ import kotlin.math.min
  */
 class ClockGame : CanvasGame {
     private val clockPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    override fun onStart(context: Context) {
-    }
-
-    override fun onEnd(context: Context) {
-    }
-
+    private var start = false
     override fun getName(): String {
         return "时钟壁纸"
     }
 
 
     override fun onDraw(canvas: Canvas) {
+        if (start.not()) {
+            return
+        }
         val minSize = min(canvas.width, canvas.height)
         if (minSize == 0) {
             return
@@ -107,5 +104,13 @@ class ClockGame : CanvasGame {
     }
 
     override fun onOffset(xOffset: Float, yOffset: Float) {
+    }
+
+    override fun onResume() {
+        start = true
+    }
+
+    override fun onPause() {
+        start = false
     }
 }

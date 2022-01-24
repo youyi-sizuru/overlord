@@ -8,9 +8,9 @@ import com.lifefighter.widget.wallpaper.CanvasPainter
  * @created on 2022/1/19.
  */
 interface CanvasGame : CanvasPainter {
-    fun onStart(context: Context)
+    fun onStart(context: Context) {}
 
-    fun onEnd(context: Context)
+    fun onEnd(context: Context) {}
 
     fun getName(): String
 }

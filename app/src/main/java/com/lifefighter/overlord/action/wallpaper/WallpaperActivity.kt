@@ -55,6 +55,20 @@ class WallpaperActivity : BaseActivity<WallpaperBinding>() {
         }))
     }
 
+    override fun onResume() {
+        super.onResume()
+        adapter.data.forEach {
+            (it as? CanvasModel)?.game?.onResume()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        adapter.data.forEach {
+            (it as? CanvasModel)?.game?.onPause()
+        }
+    }
+
     private fun startWallpaper() {
         WallpaperManager.getInstance(this).clear()
         val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).also {

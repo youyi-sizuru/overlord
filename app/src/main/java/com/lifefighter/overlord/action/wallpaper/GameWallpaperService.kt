@@ -27,6 +27,14 @@ class GameWallpaperService : CanvasWallpaperService() {
         game?.onDraw(canvas)
     }
 
+    override fun onResume() {
+        game?.onResume()
+    }
+
+    override fun onPause() {
+        game?.onPause()
+    }
+
     override fun onOffset(xOffset: Float, yOffset: Float) {
         game?.onOffset(xOffset, yOffset)
     }

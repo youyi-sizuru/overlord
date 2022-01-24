@@ -90,6 +90,13 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
         }
     }
 
+    fun resume() {
+    }
+
+    fun pause() {
+        lastMoveTime = null
+    }
+
     fun move() {
         if (isStart.not()) {
             return
