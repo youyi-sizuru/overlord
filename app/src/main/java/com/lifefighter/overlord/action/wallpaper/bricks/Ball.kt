@@ -66,7 +66,7 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
     override fun reset() {
         offsetX = 0f
         offsetY = 0f
-        val size = game.width * max(1, 10 - game.level) / 100f
+        val size = game.width * max(1, 10 - game.level / 2) / 100f
         rect.bottom = game.board.top - 1f
         rect.top = rect.bottom - size
         rect.left = game.board.centerX - size / 2
@@ -107,6 +107,7 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
             }
             offsetX += collisionMove.move * cos(Math.toRadians(angle.toDouble())).toFloat()
             offsetY += collisionMove.move * sin(Math.toRadians(angle.toDouble())).toFloat()
+            // TODO 角度根据碰撞的物体的移动速度稍作变化
             angle =
                 if (collisionMove.direction == CollisionDirection.LEFT || collisionMove.direction == CollisionDirection.RIGHT) {
                     (180 - angle + 360) % 360

@@ -26,11 +26,11 @@ class Board(private val game: BricksGame) : DrawAble, ResetAble, CollisionBlock 
     }
 
     override fun reset() {
-        val width = game.width * max(1, (10 - game.level)) / 20
+        val width = game.width * max(1, (10 - game.level / 2)) / 20
         val center = game.width / 2
         rect.left = center - width / 2
         rect.right = center + width / 2
-        rect.bottom = game.height - game.height * (min(9, game.level) + 1) / 30
+        rect.bottom = game.height - game.height * (min(9, game.level / 2) + 1) / 30
         rect.top = rect.bottom - game.width / 80
         offsetX = 0f
     }
