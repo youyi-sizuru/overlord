@@ -21,7 +21,7 @@ interface ResetAble {
  */
 interface CollisionBlock {
     /**
-     * 碰到这个物品的那个方向会死亡
+     * 碰到这个物品的哪个方向会死亡
      */
     fun isDead(direction: CollisionDirection): Boolean
 

@@ -2,43 +2,44 @@ package com.lifefighter.overlord.action.wallpaper.bricks
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import kotlin.math.min
 
 /**
  * 砖块们
  */
 class Bricks(private val game: BricksGame) : ResetAble, DrawAble, CollisionBlock {
-    private val brickList = mutableListOf<List<Brick>>()
-    private var space: Float = 0f
+    private val brickList = mutableListOf<Brick>()
     override fun onDraw(canvas: Canvas) {
-        canvas.save()
-        for (list in brickList) {
-            canvas.translate(0f, space)
-            canvas.save()
-            for (brick in list) {
-                canvas.translate(space, 0f)
-                brick.onDraw(canvas)
-                canvas.translate(brick.width.toFloat(), 0f)
-            }
-            canvas.restore()
-            canvas.translate(0f, space)
+        for (brick in brickList) {
+            brick.onDraw(canvas)
         }
-        canvas.restore()
     }
 
     override fun reset() {
         val row = 4 + min(game.level, 10)
         val column = 2 + min(game.level / 2, 5)
         val height = game.height / (4 * row)
-        space = height.toFloat()
+        val space = game.width / 60f
         val width = ((game.width - (column + 1) * space) / column).toInt()
         brickList.clear()
+        var offsetX = 0f
+        var offsetY = 0f
         for (i in 0 until row) {
-            val list = mutableListOf<Brick>()
+            offsetY += space
             for (j in 0 until column) {
-                list.add(Brick(width, height))
+                offsetX += space
+                brickList.add(
+                    Brick(
+                        RectF(offsetX, offsetY, offsetX + width, offsetY + height),
+                        if ((i + j) % 2 == 0) Color.BLUE else Color.WHITE
+                    )
+                )
+                offsetX += width
             }
-            brickList.add(list)
+            offsetY += height
+            offsetX = 0f
         }
     }
 
@@ -47,26 +48,37 @@ class Bricks(private val game: BricksGame) : ResetAble, DrawAble, CollisionBlock
     }
 
     override fun calculateCollisionMove(ball: Ball): CollisionMove {
-        return brickList.flatten().map {
+        return brickList.map {
             it.calculateCollisionMove(ball)
         }.minOrNull() ?: CollisionMove(this, Float.MAX_VALUE, CollisionDirection.BOTTOM)
     }
 
     fun isWin(): Boolean {
-        return brickList.isNotEmpty() && brickList.flatten().none {
+        return brickList.isNotEmpty() && brickList.none {
             it.hasBreak.not()
         }
     }
 }
 
-class Brick(val width: Int, val height: Int) : DrawAble, CollisionBlock {
+class Brick(
+    private val rect: RectF,
+    color: Int
+) : DrawAble,
+    CollisionBlock {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    init {
+        paint.color = color
+        paint.style = Paint.Style.FILL
+    }
+
+    /**
+     * 被击毁
+     */
     var hasBreak = false
     override fun onDraw(canvas: Canvas) {
         if (hasBreak.not()) {
-            canvas.save()
-            canvas.clipRect(0, 0, width, height)
-            canvas.drawColor(Color.WHITE)
-            canvas.restore()
+            canvas.drawRect(rect, paint)
         }
     }
 
@@ -78,7 +90,8 @@ class Brick(val width: Int, val height: Int) : DrawAble, CollisionBlock {
         if (hasBreak) {
             return CollisionMove(this, Float.MAX_VALUE, CollisionDirection.BOTTOM)
         }
-        return CollisionMove(this, Float.MAX_VALUE, CollisionDirection.BOTTOM)
+        val move = ball.calculateCollisionMove(rect)
+        return CollisionMove(this, move.second, move.first)
     }
 
     override fun afterCollision() {

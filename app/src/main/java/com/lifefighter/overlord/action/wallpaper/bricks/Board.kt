@@ -52,16 +52,13 @@ class Board(private val game: BricksGame) : DrawAble, ResetAble, CollisionBlock 
     }
 
     override fun calculateCollisionMove(ball: Ball): CollisionMove {
-        val topRect = RectF(
-            rect.left.toFloat() + offsetX,
-            rect.top.toFloat() - ball.radius,
-            rect.right.toFloat() + offsetX,
-            rect.top.toFloat()
+        val offsetRect = RectF(
+            rect.left + offsetX,
+            rect.top.toFloat(),
+            rect.right + offsetX,
+            rect.bottom.toFloat()
         )
-        return CollisionMove(
-            this,
-            ball.calculateCollisionMove(topRect, CollisionDirection.TOP),
-            CollisionDirection.TOP
-        )
+        val move = ball.calculateCollisionMove(offsetRect)
+        return CollisionMove(this, move.second, move.first)
     }
 }

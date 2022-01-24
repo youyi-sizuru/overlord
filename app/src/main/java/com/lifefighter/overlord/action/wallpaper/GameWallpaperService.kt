@@ -20,7 +20,7 @@ class GameWallpaperService : CanvasWallpaperService() {
                 MMKV.defaultMMKV().getString(AppConst.GAME_TYPE, ClockGame::class.java.name)!!
             ).newInstance() as? CanvasGame
         } ?: ClockGame()
-        game?.onStart()
+        game?.onStart(this)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -32,7 +32,7 @@ class GameWallpaperService : CanvasWallpaperService() {
     }
 
     override fun onDestroy() {
+        game?.onEnd(this)
         super.onDestroy()
-        game?.onEnd()
     }
 }

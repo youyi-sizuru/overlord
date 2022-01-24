@@ -122,7 +122,59 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
         }
     }
 
-    fun calculateCollisionMove(rectF: RectF, direction: CollisionDirection): Float {
+    /**
+     * 计算小球会撞到一个矩形的方向+距离
+     * TODO 矩形的4个角撞击判定
+     */
+    fun calculateCollisionMove(rect: RectF): Pair<CollisionDirection, Float> {
+        val topRect = RectF(
+            rect.left,
+            rect.top - radius,
+            rect.right,
+            rect.top
+        )
+        var direction = CollisionDirection.TOP
+        var minMove = calculateCollisionMove(topRect, CollisionDirection.TOP)
+        val leftRect = RectF(
+            rect.left - radius,
+            rect.top,
+            rect.left,
+            rect.bottom
+        )
+        val bottomRect = RectF(
+            rect.left,
+            rect.bottom,
+            rect.right,
+            rect.bottom + radius
+        )
+        val bottomMove = calculateCollisionMove(bottomRect, CollisionDirection.BOTTOM)
+        if (bottomMove < minMove) {
+            minMove = bottomMove
+            direction = CollisionDirection.BOTTOM
+        }
+        val leftMove = calculateCollisionMove(leftRect, CollisionDirection.LEFT)
+        if (leftMove < minMove) {
+            minMove = leftMove
+            direction = CollisionDirection.LEFT
+        }
+        val rightRect = RectF(
+            rect.right,
+            rect.top,
+            rect.right + radius,
+            rect.bottom
+        )
+        val rightMove = calculateCollisionMove(rightRect, CollisionDirection.RIGHT)
+        if (rightMove < minMove) {
+            minMove = rightMove
+            direction = CollisionDirection.RIGHT
+        }
+        return Pair(direction, minMove)
+    }
+
+    /**
+     * 计算小球的中心以某一个方向进入一个矩形需要的距离
+     */
+    private fun calculateCollisionMove(rectF: RectF, direction: CollisionDirection): Float {
         val angle = Math.toRadians(angle.toDouble()).toFloat()
         //X轴方向移动系数
         val cos = cos(angle)
@@ -135,10 +187,10 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
         if (direction == CollisionDirection.BOTTOM && sin >= 0) {
             return Float.MAX_VALUE
         }
-        if (direction == CollisionDirection.LEFT && cos >= 0) {
+        if (direction == CollisionDirection.RIGHT && cos >= 0) {
             return Float.MAX_VALUE
         }
-        if (direction == CollisionDirection.RIGHT && cos <= 0) {
+        if (direction == CollisionDirection.LEFT && cos <= 0) {
             return Float.MAX_VALUE
         }
         val centerPoint = this.centerPoint

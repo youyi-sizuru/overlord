@@ -1,5 +1,6 @@
 package com.lifefighter.overlord.action.wallpaper.bricks
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Handler
@@ -129,6 +130,9 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
         }
     }
 
+    /**
+     * 进行各种计算
+     */
     private fun calculate() {
         messageHandler?.post {
             synchronized(this@BricksGame) {
@@ -153,7 +157,7 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
         }
     }
 
-    override fun onStart() {
+    override fun onStart(context: Context) {
         ioThread = HandlerThread("bricks").also {
             it.start()
             messageHandler = Handler(it.looper)
@@ -161,7 +165,7 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
         reset()
     }
 
-    override fun onEnd() {
+    override fun onEnd(context: Context) {
         messageHandler?.removeCallbacksAndMessages(null)
         messageHandler = null
         ioThread?.quit()
@@ -178,6 +182,7 @@ class BricksGame : CanvasGame, DrawAble, ResetAble {
     fun calculateCollisionMove(ball: Ball): CollisionMove {
         var minMove = wall.calculateCollisionMove(ball)
         minMove = minOf(minMove, board.calculateCollisionMove(ball))
+        minMove = minOf(minMove, bricks.calculateCollisionMove(ball))
         return minMove
     }
 }

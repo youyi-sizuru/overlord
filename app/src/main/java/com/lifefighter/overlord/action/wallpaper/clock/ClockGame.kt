@@ -1,5 +1,6 @@
 package com.lifefighter.overlord.action.wallpaper.clock
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -13,10 +14,10 @@ import kotlin.math.min
  */
 class ClockGame : CanvasGame {
     private val clockPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    override fun onStart() {
+    override fun onStart(context: Context) {
     }
 
-    override fun onEnd() {
+    override fun onEnd(context: Context) {
     }
 
     override fun getName(): String {

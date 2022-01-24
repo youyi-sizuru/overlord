@@ -1,5 +1,6 @@
 package com.lifefighter.overlord.action.wallpaper
 
+import android.content.Context
 import com.lifefighter.widget.wallpaper.CanvasPainter
 
 /**
@@ -7,9 +8,9 @@ import com.lifefighter.widget.wallpaper.CanvasPainter
  * @created on 2022/1/19.
  */
 interface CanvasGame : CanvasPainter {
-    fun onStart()
+    fun onStart(context: Context)
 
-    fun onEnd()
+    fun onEnd(context: Context)
 
     fun getName(): String
 }

@@ -31,7 +31,7 @@ class Wall : DrawAble, ResetAble, CollisionBlock {
     }
 
     override fun isDead(direction: CollisionDirection): Boolean {
-        return direction == CollisionDirection.BOTTOM
+        return false
     }
 
     override fun calculateCollisionMove(ball: Ball): CollisionMove {
