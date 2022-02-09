@@ -52,12 +52,26 @@
                 android:singleLine="true"
                 android:text="@{m.name}"
                 android:textColor="?android:textColorPrimary"
-                app:layout_constraintBottom_toTopOf="@+id/messageView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/logoView"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed"
                 tools:text="肝帝" />
+
+            <com.lifefighter.widget.text.ExText
+                android:id="@+id/levelView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:singleLine="true"
+                android:text="@{m.levelDesc}"
+                android:textColor="?android:textColorSecondary"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@+id/nameView"
+                app:layout_constraintStart_toStartOf="@+id/nameView"
+                app:layout_constraintTop_toBottomOf="@+id/nameView"
+                app:layout_constraintBottom_toTopOf="@+id/messageView"
+                tools:text="等级: 58" />
 
             <com.lifefighter.widget.text.ExText
                 android:id="@+id/messageView"
@@ -71,7 +85,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/nameView"
                 app:layout_constraintStart_toStartOf="@+id/nameView"
-                app:layout_constraintTop_toBottomOf="@+id/nameView"
+                app:layout_constraintTop_toBottomOf="@+id/levelView"
                 tools:text="本月已经签到27天" />
 
             <com.lifefighter.widget.card.ExCardView

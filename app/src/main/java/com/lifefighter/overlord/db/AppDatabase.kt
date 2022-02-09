@@ -3,13 +3,15 @@ package com.lifefighter.overlord.db
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import org.koin.dsl.module
 
 /**
  * @author xzp
  * @created on 2021/3/13.
  */
-@Database(entities = [MihoyoAccount::class], version = 1)
+@Database(entities = [MihoyoAccount::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getMihoyoAccountDao(): MihoyoAccountDao
 }
@@ -20,7 +22,11 @@ object AppDatabaseModule {
             Room.databaseBuilder(
                 get(),
                 AppDatabase::class.java, "overlord"
-            ).build()
+            ).addMigrations(object : Migration(1, 2) {
+                override fun migrate(database: SupportSQLiteDatabase) {
+                    database.execSQL("alter table mihoyo_account add column level INTEGER NOT NULL default 0")
+                }
+            }).build()
         }
         single {
             get<AppDatabase>().getMihoyoAccountDao()

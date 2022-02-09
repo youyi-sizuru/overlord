@@ -169,6 +169,7 @@ class MihoyoAccountItemModel(val account: MihoyoAccount) {
     val todaySigned = account.todaySigned
     val signMessage = "本月已经签到${account.signDays}天"
     val logoText = account.nickname.firstOrNull()?.toString() ?: "?"
+    val levelDesc = "等级: ${account.level}"
 }
 
 class SignWork(
@@ -249,6 +250,7 @@ class SignWork(
             accountDao.update(
                 account.copy(
                     nickname = userInfo.nickname.orEmpty(),
+                    level = userInfo.level.orZero(),
                     lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
                     signDays = signInfo.totalSignDay.orZero()
                 )
@@ -260,7 +262,7 @@ class SignWork(
         val TAG = SignWork::class.java.name
         fun startWork(context: Context) {
             val request = PeriodicWorkRequestBuilder<SignWork>(
-                6,
+                2,
                 TimeUnit.HOURS
             ).addTag(TAG).build()
             WorkManager.getInstance(context)

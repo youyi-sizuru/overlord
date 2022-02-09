@@ -78,7 +78,8 @@ class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>()
                     regionName = it.regionName.orEmpty(),
                     cookie = cookie,
                     lastSignDay = if (signInfo.sign != true) 0 else System.currentTimeMillis(),
-                    signDays = signInfo.totalSignDay.orZero()
+                    signDays = signInfo.totalSignDay.orZero(),
+                    level = it.level.orZero()
                 )
             }?.let {
                 get<MihoyoAccountDao>().add(*it.toTypedArray())
