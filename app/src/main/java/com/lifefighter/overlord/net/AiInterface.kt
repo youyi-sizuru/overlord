@@ -9,8 +9,8 @@ import retrofit2.http.Query
  */
 
 interface AiInterface {
-    @GET("api.php?key=free&appid=0")
+    @GET("openapi/api?key=49de46c409c047d19b2ed2285e8775a6")
     suspend fun api(
-        @Query("msg") msg: String
+        @Query("info") msg: String
     ): String?
 }

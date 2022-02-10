@@ -18,7 +18,6 @@ import java.util.regex.Pattern
  */
 @TargetApi(Build.VERSION_CODES.N)
 class WechatAccessibilityService : ExAccessibilityService() {
-    private var mSendMessage: WechatSendMessageEvent? = null
     private var mInProgressMessage: Boolean = false
     private val mWhiteUserList = listOf("老姐")
     private val mChatNamePattern = Pattern.compile("^当前所在页面,与(.*)的聊天$")
@@ -95,35 +94,39 @@ class WechatAccessibilityService : ExAccessibilityService() {
                 return
             }
             val receiveText = chatTextNode.text?.toString().orEmpty()
-            val sendEvent = mSendMessage
-            if (sendEvent != null) {
-                mSendMessage = null
-                if (sendEvent.receive == receiveText) {
-                    sendMessage(editTextNode, sendEvent.send)
-                }
-            } else {
-                mInProgressMessage = true
-                GlobalScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, _ ->
-                    mInProgressMessage = false
-                }) {
-                    val sendMessage = bg {
-                        val aiInterface = getKoin().get<AiInterface>()
+            mInProgressMessage = true
+            GlobalScope.launch(Dispatchers.Main + CoroutineExceptionHandler { _, _ ->
+                sendMessage("我没有听懂，能再说一遍吗")
+                mInProgressMessage = false
+                rootInActiveWindow?.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+            }) {
+                val sendMessage = bg {
+                    val aiInterface = getKoin().get<AiInterface>()
+                    var content: String? = null
+                    for (i in 0 until 2) {
                         val resultMap =
-                            aiInterface.api(receiveText).parseMapJson<String>()
-                        resultMap["content"]
+                            tryOrNull {
+                                aiInterface.api(receiveText).parseMapJson<String>()
+                            }
+
+                        content = resultMap?.get("text")
+                        if (content != null) {
+                            break
+                        }
                     }
-                    if (sendMessage != null) {
-                        mSendMessage = WechatSendMessageEvent(receiveText, "$sendMessage(这是AI)")
-                    }
-                    mInProgressMessage = false
+                    content ?: "我没有听懂，能再说一遍吗"
                 }
+                sendMessage(sendMessage)
+                mInProgressMessage = false
             }
         }
     }
 
 
-    private fun sendMessage(editTextNode: AccessibilityNodeInfo, message: String) {
-        keepSafe()
+    private fun sendMessage(message: String) {
+        val editTextNode =
+            rootInActiveWindow?.findFirstAccessibilityNodeInfoByClassName("android.widget.EditText")
+                ?: return
         editTextNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {
             putCharSequence(
                 AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,

@@ -23,6 +23,7 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * @author xzp
@@ -57,10 +58,9 @@ object AppInterfaceModule {
                     logDebug(it)
                 }.apply {
                     level = HttpLoggingInterceptor.Level.BODY
-                })
-                    .build()
+                }).connectTimeout(5, TimeUnit.SECONDS).build()
             ).addConverterFactory(ScalarsConverterFactory.create())
-                .baseUrl("http://api.qingyunke.com").build()
+                .baseUrl("https://www.tuling123.com").build()
         }
         single {
             get<Retrofit>(AI_QUALIFIER).create(AiInterface::class.java)
