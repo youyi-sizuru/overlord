@@ -6,4 +6,7 @@
     <string name="get_account_title">获取账户</string>
     <string name="wallpaper_title">壁纸服务</string>
     <string name="game_wallpaper_desc">游戏壁纸</string>
+    <string name="wechat_support_title">微信辅助功能</string>
+    <string name="wechat_support_desc">微信辅助功能</string>
+    <string name="wechat_support_summary">帮助微信实现一些功能，包括自动回复等。</string>
 </resources>

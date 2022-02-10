@@ -17,6 +17,7 @@ import org.koin.dsl.module
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.lang.reflect.Type
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -29,6 +30,7 @@ import java.util.*
  */
 object AppInterfaceModule {
     private val MIHOYO_QUALIFIER = StringQualifier("mihoyo")
+    private val AI_QUALIFIER = StringQualifier("ai")
     val module = module {
         single(qualifier = MIHOYO_QUALIFIER) {
             Retrofit.Builder().client(
@@ -48,6 +50,20 @@ object AppInterfaceModule {
         }
         worker { (workerParameters: WorkerParameters) ->
             SignWork(get(), get(), get(), workerParameters)
+        }
+        single(qualifier = AI_QUALIFIER) {
+            Retrofit.Builder().client(
+                OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor {
+                    logDebug(it)
+                }.apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                })
+                    .build()
+            ).addConverterFactory(ScalarsConverterFactory.create())
+                .baseUrl("http://api.qingyunke.com").build()
+        }
+        single {
+            get<Retrofit>(AI_QUALIFIER).create(AiInterface::class.java)
         }
     }
 }

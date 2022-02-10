@@ -1,17 +1,21 @@
 package com.lifefighter.overlord
 
 import android.app.WallpaperManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.string
+import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilityService
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
 import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
 import com.lifefighter.overlord.databinding.ActivityMainBinding
 import com.lifefighter.overlord.databinding.MainToolItemBinding
 import com.lifefighter.overlord.model.ToolData
+import com.lifefighter.utils.AccessibilityServiceUtils
 import com.lifefighter.utils.orTrue
 import com.lifefighter.utils.toast
 import com.lifefighter.utils.tryOrNull
@@ -32,6 +36,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         )
         adapter.addData(ToolData(0, string(R.string.mihoyo_auto_sign_title)))
         adapter.addData(ToolData(1, string(R.string.wallpaper_title)))
+        adapter.addData(ToolData(2, string(R.string.wechat_support_title)))
         viewBinding.list.adapter = adapter
         viewBinding.list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
     }
@@ -56,6 +61,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     return
                 }
                 route(WallpaperActivity::class)
+            }
+            2L -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    toast("系统版本过低，请更新系统至android 7.0以上")
+                    return
+                }
+                if (AccessibilityServiceUtils.isAccessibilityServiceEnabled(
+                        this,
+                        WechatAccessibilityService::class
+                    )
+                ) {
+                    toast("服务已经启动，请打开微信")
+                } else {
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }
             }
         }
     }
