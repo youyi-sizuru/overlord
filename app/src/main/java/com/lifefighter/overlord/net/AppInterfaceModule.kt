@@ -58,7 +58,7 @@ object AppInterfaceModule {
                     logDebug(it)
                 }.apply {
                     level = HttpLoggingInterceptor.Level.BODY
-                }).connectTimeout(5, TimeUnit.SECONDS).build()
+                }).connectTimeout(10, TimeUnit.SECONDS).build()
             ).addConverterFactory(ScalarsConverterFactory.create())
                 .baseUrl("https://www.tuling123.com").build()
         }

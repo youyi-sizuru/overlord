@@ -15,6 +15,7 @@ import org.koin.core.KoinExperimentalAPI
 import org.koin.core.component.KoinApiExtension
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 /**
  * @author xzp
@@ -30,7 +31,7 @@ class MainApplication : Application(), KoinComponent {
         EventBusManager.init()
         ToastUtils.init(this)
         startKoin {
-            androidLogger()
+            androidLogger(Level.ERROR)
             androidContext(this@MainApplication)
             workManagerFactory()
             modules(NetUtils.module, AppInterfaceModule.module)

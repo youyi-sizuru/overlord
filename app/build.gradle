@@ -64,5 +64,6 @@ dependencies {
     implementation project(":utils")
     implementation project(":widget")
     implementation libraries.database
+    implementation libraries.floatWindow
     kapt libraries.databaseCompiler
 }

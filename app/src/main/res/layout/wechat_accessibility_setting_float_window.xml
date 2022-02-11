@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#33000000"
+        android:keepScreenOn="true">
+
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.lifefighter.widget.list.ExRecyclerView
+                android:id="@+id/listView"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:reverseLayout="true" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/white" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.lifefighter.widget.text.ExText
+                    android:id="@+id/addView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingVertical="@dimen/default_padding_vertical"
+                    android:text="添加"
+                    android:textColor="@color/white" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/white" />
+
+                <com.lifefighter.widget.text.ExText
+                    android:id="@+id/deleteView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingVertical="@dimen/default_padding_vertical"
+                    android:text="删除"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.lifefighter.widget.text.ExText
+            android:id="@+id/closeView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="#99000000"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/default_padding_horizontal"
+            android:paddingVertical="@dimen/default_padding_vertical"
+            android:text="关闭"
+            android:textColor="@color/white" />
+    </FrameLayout>
+</layout>

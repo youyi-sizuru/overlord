@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.string
 import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilityService
+import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilitySettingActivity
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
 import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
 import com.lifefighter.overlord.databinding.ActivityMainBinding
@@ -72,7 +73,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                         WechatAccessibilityService::class
                     )
                 ) {
-                    toast("服务已经启动，请打开微信")
+                    route(WechatAccessibilitySettingActivity::class)
                 } else {
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }

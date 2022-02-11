@@ -9,4 +9,5 @@
     <string name="wechat_support_title">微信辅助功能</string>
     <string name="wechat_support_desc">微信辅助功能</string>
     <string name="wechat_support_summary">帮助微信实现一些功能，包括自动回复等。</string>
+    <string name="wechat_accessibility_setting_title">微信辅助设置</string>
 </resources>
