@@ -25,6 +25,7 @@ interface AiInterface {
 object AiChat {
     private val mKeys =
         arrayOf(
+            "5da047a95db8450ea6e710dd065d4be4",
             "49de46c409c047d19b2ed2285e8775a6",
             "bd35d0e4054c6a4c06059f1a454bd2d3",
             "dfeb1cc8125943d29764a2f2f5c33739",
@@ -60,7 +61,7 @@ object AiChat {
                             mTodayTempKeys.remove(key)
                         }
                     }
-                    if (code == 0) {
+                    if (code == 10000) {
                         result["content"]
                     } else {
                         null
