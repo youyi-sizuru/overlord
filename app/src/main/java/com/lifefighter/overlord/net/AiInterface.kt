@@ -62,7 +62,7 @@ object AiChat {
                         }
                     }
                     if (code == 100000) {
-                        result["content"]
+                        result["text"]
                     } else {
                         null
                     }
