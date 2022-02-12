@@ -61,7 +61,7 @@ object AiChat {
                             mTodayTempKeys.remove(key)
                         }
                     }
-                    if (code == 10000) {
+                    if (code == 100000) {
                         result["content"]
                     } else {
                         null
