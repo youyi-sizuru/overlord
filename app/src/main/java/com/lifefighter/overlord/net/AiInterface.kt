@@ -1,11 +1,10 @@
 package com.lifefighter.overlord.net
 
-import com.lifefighter.utils.bg
-import com.lifefighter.utils.parseMapJson
-import com.lifefighter.utils.tryOrNull
+import com.lifefighter.utils.*
 import org.koin.java.KoinJavaComponent.getKoin
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.util.*
 
 /**
  * @author xzp
@@ -24,21 +23,44 @@ interface AiInterface {
 }
 
 object AiChat {
-    private val codes =
+    private val mKeys =
         arrayOf(
             "49de46c409c047d19b2ed2285e8775a6",
             "bd35d0e4054c6a4c06059f1a454bd2d3",
             "dfeb1cc8125943d29764a2f2f5c33739",
             "7c8cdb56b0dc4450a8deef30a496bd4c",
         )
+    private var mTodayTime = 0L
+    private val mTodayTempKeys = mutableListOf<String>()
 
     suspend fun getChatResult(receiveText: String): String = bg {
         val aiInterface = getKoin().get<AiInterface>()
         val content: String? = kotlin.run {
-            for (code in codes) {
+            val todayTime = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            if (todayTime != mTodayTime) {
+                ui {
+                    mTodayTime = todayTime
+                    mTodayTempKeys.clear()
+                    mTodayTempKeys.addAll(mKeys)
+                }
+            }
+            val keys = mTodayTempKeys.toList()
+            for (key in keys) {
                 val content = tryOrNull {
-                    val result = aiInterface.api(receiveText, code).parseMapJson<String>()
-                    if (result["code"]?.toInt() == 0) {
+                    val result = aiInterface.api(receiveText, key).parseMapJson<String>()
+                    val code = result["code"]?.toInt()
+                    if (code == 40004) {
+                        logDebug("$key 今日的调用数量已经没有了")
+                        ui {
+                            mTodayTempKeys.remove(key)
+                        }
+                    }
+                    if (code == 0) {
                         result["content"]
                     } else {
                         null

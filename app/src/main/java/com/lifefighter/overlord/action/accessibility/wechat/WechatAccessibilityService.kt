@@ -68,18 +68,7 @@ class WechatAccessibilityService : ExAccessibilityService() {
             sendLog("找不到输入框")
             return@bg
         }
-        val sendButtonNode =
-            rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.Button")
-                ?.firstOrNull {
-                    it.text?.toString() == "发送"
-                }
-        if (sendButtonNode != null) {
-            sendLog("发现发送按钮，点击发送按钮")
-            clickNode(sendButtonNode)
-            delay(100)
-            sendLog("发送完成")
-            return@bg
-        }
+
         if (mChatListMap[userName].isNullOrEmpty()) {
             return@bg
         }
@@ -92,9 +81,30 @@ class WechatAccessibilityService : ExAccessibilityService() {
                 sendMessage
             )
         })
-        delay(500)
+        delay(300)
+        var findSendButton = false
+        for (i in 0 until 10) {
+            val sendButtonNode =
+                rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.Button")
+                    ?.firstOrNull {
+                        it.text?.toString() == "发送"
+                    }
+            if (sendButtonNode != null) {
+                sendLog("发现发送按钮，点击发送按钮")
+                clickNode(sendButtonNode)
+                delay(100)
+                sendLog("发送完成")
+                findSendButton = true
+                break
+            }
+            delay(100)
+        }
         mChatListMap[userName]?.remove(message)
-        sendLog("回复完成")
+        if (findSendButton) {
+            sendLog("回复完成")
+        } else {
+            sendLog("找不到发送按钮，估计出错了，忽略该消息")
+        }
     }
 
     override fun onStop() {
