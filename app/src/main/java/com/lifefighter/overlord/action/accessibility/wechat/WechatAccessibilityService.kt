@@ -26,6 +26,7 @@ class WechatAccessibilityService : ExAccessibilityService() {
     private lateinit var mWechatAccessibilitySettingData: WechatAccessibilitySettingData
     private val mChatListMap = ConcurrentHashMap<String, MutableList<String>>()
     private var mSendMessageJob: Job? = null
+    private var mReceiveMessageJob: Job? = null
     override fun onStart() {
         EventBusManager.register(this)
         mWechatAccessibilitySettingData =
@@ -116,7 +117,15 @@ class WechatAccessibilityService : ExAccessibilityService() {
     }
 
     override fun onReceiveEvent(event: AccessibilityEvent?) {
-        startWechatChatRobot()
+        if (mReceiveMessageJob?.isActive.orFalse()) {
+            logDebug("事件太频繁了,停掉当前job等待稳定")
+            mReceiveMessageJob?.cancel()
+        }
+        mReceiveMessageJob = launch {
+            delay(100)
+            startWechatChatRobot()
+        }
+
     }
 
     private fun startWechatChatRobot() {
