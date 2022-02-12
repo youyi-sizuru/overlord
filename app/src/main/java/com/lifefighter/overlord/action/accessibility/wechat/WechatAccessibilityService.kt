@@ -74,7 +74,7 @@ class WechatAccessibilityService : ExAccessibilityService() {
         }
         val message = mChatListMap[userName]?.firstOrNull() ?: return@bg
         val sendMessage = AiChat.getChatResult(message)
-        sendLog("消息:\n${message}回复内容: \n$sendMessage")
+        sendLog("消息:\n${message}\n回复内容: \n$sendMessage")
         editTextNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {
             putCharSequence(
                 AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
