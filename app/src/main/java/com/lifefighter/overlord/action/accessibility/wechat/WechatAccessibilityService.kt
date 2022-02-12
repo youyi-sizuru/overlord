@@ -11,10 +11,10 @@ import com.lifefighter.utils.*
 import com.lifefighter.widget.accessibility.ExAccessibilityService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.util.regex.Pattern
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -24,7 +24,7 @@ import java.util.regex.Pattern
 @TargetApi(Build.VERSION_CODES.N)
 class WechatAccessibilityService : ExAccessibilityService() {
     private lateinit var mWechatAccessibilitySettingData: WechatAccessibilitySettingData
-    private val mChatNamePattern = Pattern.compile("^当前所在页面,与(.*)的聊天$")
+    private val mChatListMap = ConcurrentHashMap<String, MutableList<String>>()
     private var mSendMessageJob: Job? = null
     override fun onStart() {
         EventBusManager.register(this)
@@ -32,108 +32,161 @@ class WechatAccessibilityService : ExAccessibilityService() {
             AppConfigsUtils.getString(AppConst.WECHAT_ACCESSIBILITY_SETTING, null)
                 ?.parseJsonOrNull()
                 ?: WechatAccessibilitySettingData()
-    }
-
-    override fun onStop() {
-        EventBusManager.unregister(this)
-    }
-
-    override fun onReceiveEvent(event: AccessibilityEvent?) {
-        if (mSendMessageJob?.isActive.orFalse()) {
-            return
-        }
         mSendMessageJob = launch {
             bg {
-                val switchButtonNode = findSwitchButton() ?: return@bg
-                val windowsTitle = rootInActiveWindow?.contentDescription?.toString().orEmpty()
-                sendLog("微信当前页面标题: $windowsTitle")
-                val userName = getChatUserName()
-                val inWhite = ui {
-                    mWechatAccessibilitySettingData.whiteList.orEmpty().contains(userName)
-                }
-                if (inWhite.not()) {
-                    sendLog("当前对象不在聊天列表中，忽略")
-                    return@bg
-                }
-                if (switchButtonNode.contentDescription?.toString() == "切换到键盘") {
-                    sendLog("发现当前是语音输入，切换模式")
-                    clickNode(switchButtonNode)
-                    delay(1000)
-                    back()
-                    delay(1000)
-                    sendLog("切换完成")
-                }
-                val editTextNode =
-                    rootInActiveWindow?.findFirstAccessibilityNodeInfoByClassName("android.widget.EditText")
-
-                if (editTextNode == null) {
-                    sendLog("找不到输入框")
-                    return@bg
-                }
-                val bottomBarNode = editTextNode.parent?.parent ?: return@bg
-                val sendButtonNode = bottomBarNode.findFirstAccessibilityNodeInfoByText("发送")
-                if (sendButtonNode != null) {
-                    sendLog("发现发送按钮，点击发送按钮")
-                    clickNode(sendButtonNode)
+                while (true) {
+                    tryOrNothing {
+                        startSendMessage()
+                    }
                     delay(100)
-                    sendLog("发送完成")
-                    return@bg
                 }
-                sendLog("开始查找聊天记录")
-                val receiveList = getReceiveText()
-                if (receiveList.isEmpty()) {
-                    sendLog("未发现聊天记录")
-                    return@bg
-                }
-                sendLog("找到聊天记录:\n ${receiveList.joinToString(separator = "\n")}")
-                sendLog("开始回复该聊天记录")
-                val sendMessage = receiveList.map {
-                    bgImmediately { AiChat.getChatResult(it) }
-                }.map {
-                    it.await()
-                }.joinToString(separator = "\n")
-                sendLog("回复内容: $sendMessage")
-                editTextNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {
-                    putCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                        sendMessage
-                    )
-                })
-                delay(100)
-                sendLog("回复完成")
             }
         }
     }
 
-    private fun getReceiveText(): List<String> {
+    private suspend fun startSendMessage() = bg {
+        val userName = getChatUserName() ?: return@bg
+        val isWhite = ui {
+            mWechatAccessibilitySettingData.whiteList.orEmpty().contains(userName)
+        }
+        if (isWhite.not()) {
+            return@bg
+        }
+        val switchButtonNode = findSwitchButton() ?: return@bg
+        if (switchButtonNode.contentDescription?.toString() == "切换到键盘") {
+            sendLog("发现当前是语音输入，切换模式")
+            clickNode(switchButtonNode)
+            delay(1000)
+            back()
+            delay(1000)
+            sendLog("切换完成")
+        }
+        val editTextNode =
+            rootInActiveWindow?.findFirstAccessibilityNodeInfoByClassName("android.widget.EditText")
+
+        if (editTextNode == null) {
+            sendLog("找不到输入框")
+            return@bg
+        }
+        val sendButtonNode =
+            rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.Button")
+                ?.firstOrNull {
+                    it.text?.toString() == "发送"
+                }
+        if (sendButtonNode != null) {
+            sendLog("发现发送按钮，点击发送按钮")
+            clickNode(sendButtonNode)
+            delay(100)
+            sendLog("发送完成")
+            return@bg
+        }
+        if (mChatListMap[userName].isNullOrEmpty()) {
+            return@bg
+        }
+        val message = mChatListMap[userName]?.firstOrNull() ?: return@bg
+        val sendMessage = AiChat.getChatResult(message)
+        sendLog("消息:\n${message}回复内容: \n$sendMessage")
+        editTextNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {
+            putCharSequence(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                sendMessage
+            )
+        })
+        delay(500)
+        mChatListMap[userName]?.remove(message)
+        sendLog("回复完成")
+    }
+
+    override fun onStop() {
+        EventBusManager.unregister(this)
+        tryOrNothing {
+            mSendMessageJob?.cancel()
+            mSendMessageJob = null
+        }
+    }
+
+    override fun onReceiveEvent(event: AccessibilityEvent?) {
+        startWechatChatRobot()
+    }
+
+    private fun startWechatChatRobot() {
+        tryOrNothing {
+            if (findSwitchButton() == null) {
+                sendLog(
+                    "当前页面不在聊天页: ${
+                        rootInActiveWindow?.contentDescription?.toString().orEmpty()
+                    }"
+                )
+                return
+            }
+            findReceiveText()
+        }
+
+    }
+
+    private fun findReceiveText() {
+        sendLog("开始查找聊天记录")
         val scrollViewNode =
             rootInActiveWindow.findFirstAccessibilityNodeInfoByClassName("android.widget.ListView")
-                ?: return emptyList()
+                ?: return
         val chatItemCount = scrollViewNode.childCount
         val screenWidth = rootInActiveWindow?.getBoundsInScreen()?.width().orZero()
-        val receiveList = mutableListOf<String>()
         for (i in chatItemCount - 1 downTo 0) {
             val chatItemNode = scrollViewNode.getChild(i) ?: continue
             val imageNode =
-                chatItemNode.findFirstAccessibilityNodeInfoByViewId("com.tencent.mm:id/au2")
-                    ?: continue
+                chatItemNode.findAccessibilityNodeInfosByClassName("android.widget.ImageView")
+                    .firstOrNull {
+                        it.contentDescription?.toString()?.endsWith("头像").orFalse()
+                    } ?: continue
             val imageBounds = imageNode.getBoundsInScreen()
             if (imageBounds.left > screenWidth / 2) {
                 sendLog("最后一条聊天是本人，所以不再回复")
                 break
             }
-            val textNode =
-                chatItemNode.findFirstAccessibilityNodeInfoByViewId("com.tencent.mm:id/auk")
-            if (textNode?.className?.toString() != "android.widget.TextView") {
-                sendLog("倒数第${chatItemCount - i}条聊天不是文本信息，忽略")
-                continue
+            val userName = imageNode.contentDescription?.toString()?.removeSuffix("头像").orEmpty()
+            if (mWechatAccessibilitySettingData.whiteList.orEmpty().contains(userName).not()) {
+                sendLog("当前对象不在自动聊天列表中，忽略，用户名: $userName")
+                break
             }
-            val content = textNode.text?.toString().orEmpty()
-            if (content.isNotEmpty()) {
-                receiveList.add(0, content)
+            val textNode =
+                chatItemNode.findFirstAccessibilityNodeInfoByClassName("android.widget.TextView")
+            val message = textNode?.text?.toString().orEmpty()
+            if (message.isNotEmpty()) {
+                if (addChatMessage(userName, message)) {
+                    sendLog("找到聊天记录,用户名: $userName\n消息: $message")
+                    continue
+                } else {
+                    break
+                }
+            }
+            val faceNode =
+                chatItemNode.findAccessibilityNodeInfosByClassName("android.widget.FrameLayout")
+                    .firstOrNull {
+                        it.contentDescription.isNullOrEmpty().not()
+                    }
+            val faceDesc = faceNode?.contentDescription?.toString().orEmpty()
+            if (faceDesc.isNotEmpty()) {
+                if (addChatMessage(userName, faceDesc)) {
+                    sendLog("找到表情记录,用户名: $userName\n表情描述: $faceDesc")
+                    continue
+                } else {
+                    break
+                }
             }
         }
-        return receiveList
+        sendLog("结束查找聊天记录")
+    }
+
+    private fun addChatMessage(userName: String, message: String): Boolean {
+        val messageList =
+            mChatListMap[userName] ?: Collections.synchronizedList(mutableListOf<String>()).also {
+                mChatListMap[userName] = it
+            }
+        if (messageList.contains(message).not()) {
+            messageList.add(message)
+            return true
+        }
+        return false
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -142,6 +195,13 @@ class WechatAccessibilityService : ExAccessibilityService() {
             AppConfigsUtils.getString(AppConst.WECHAT_ACCESSIBILITY_SETTING, null)
                 ?.parseJsonOrNull()
                 ?: WechatAccessibilitySettingData()
+        val whiteList = mWechatAccessibilitySettingData.whiteList.orEmpty()
+        for (userName in mChatListMap.keys()) {
+            if (userName !in whiteList) {
+                mChatListMap.remove(userName)
+            }
+        }
+        startWechatChatRobot()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -163,10 +223,10 @@ class WechatAccessibilityService : ExAccessibilityService() {
                             AppConst.WECHAT_ACCESSIBILITY_SETTING,
                             mWechatAccessibilitySettingData.toJson()
                         )
+                        sendLog("已添加该用户到自动聊天列表, 用户名: $userName")
                         EventBusManager.post(WechatAccessibilitySettingUpdateEvent())
-                        sendLog("已添加该用户到自动聊天列表")
                     } else {
-                        sendLog("该用户已经在自动聊天列表")
+                        sendLog("该用户已经在自动聊天列表, 用户名: $userName")
                     }
                 }
             }
@@ -174,26 +234,22 @@ class WechatAccessibilityService : ExAccessibilityService() {
     }
 
     private fun findSwitchButton(): AccessibilityNodeInfo? {
-        val switchButtonNode =
-            rootInActiveWindow?.findFirstAccessibilityNodeInfoByViewId("com.tencent.mm:id/ax7")
-        val switchButtonDesc = switchButtonNode?.contentDescription?.toString()
-        if (switchButtonDesc !in arrayOf("切换到键盘", "切换到按住说话")) {
-            sendLog("当前页面不在聊天页")
-            return null
-        }
-        return switchButtonNode
+        return rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.ImageButton")
+            ?.firstOrNull {
+                val switchButtonDesc = it.contentDescription?.toString()
+                switchButtonDesc !in arrayOf("切换到键盘", "切换到按住说话")
+            }
     }
 
     private fun getChatUserName(): String? {
-        val windowsTitle = rootInActiveWindow?.contentDescription?.toString().orEmpty()
-        sendLog("微信当前页面标题: $windowsTitle")
-        val titleMatcher = mChatNamePattern.matcher(windowsTitle)
-        if (titleMatcher.matches()) {
-            val userName = titleMatcher.group(1).orEmpty()
-            sendLog("微信当前聊天对象: $userName")
-            return userName
-        }
-        return null
+        val screenWidth = rootInActiveWindow?.getBoundsInScreen()?.width().orZero()
+        val imageNode =
+            rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.ImageView")
+                ?.firstOrNull {
+                    it.contentDescription?.toString()?.endsWith("头像")
+                        .orFalse() && it.getBoundsInScreen().right < screenWidth / 2
+                }
+        return imageNode?.contentDescription?.toString()?.removeSuffix("头像")
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -217,10 +273,10 @@ class WechatAccessibilityService : ExAccessibilityService() {
                             AppConst.WECHAT_ACCESSIBILITY_SETTING,
                             mWechatAccessibilitySettingData.toJson()
                         )
+                        sendLog("已从自动聊天列表移除该用户, 用户名: $userName")
                         EventBusManager.post(WechatAccessibilitySettingUpdateEvent())
-                        sendLog("已从自动聊天列表移除该用户")
                     } else {
-                        sendLog("该用户不在自动聊天列表中")
+                        sendLog("该用户不在自动聊天列表中, 用户名: $userName")
                     }
                 }
 

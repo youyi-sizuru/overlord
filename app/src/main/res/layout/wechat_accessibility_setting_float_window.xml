@@ -16,7 +16,7 @@
             <com.lifefighter.widget.list.ExRecyclerView
                 android:id="@+id/listView"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="250dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:reverseLayout="true" />
 
