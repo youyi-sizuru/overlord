@@ -80,14 +80,18 @@ class WechatAccessibilityService : ExAccessibilityService() {
                     return@bg
                 }
                 sendLog("开始查找聊天记录")
-                val receiveText = getReceiveText()
-                if (receiveText.isNullOrEmpty()) {
+                val receiveList = getReceiveText()
+                if (receiveList.isEmpty()) {
                     sendLog("未发现聊天记录")
                     return@bg
                 }
-                sendLog("找到聊天记录: $receiveText")
+                sendLog("找到聊天记录:\n ${receiveList.joinToString(separator = "\n")}")
                 sendLog("开始回复该聊天记录")
-                val sendMessage = AiChat.getChatResult(receiveText)
+                val sendMessage = receiveList.map {
+                    bgImmediately { AiChat.getChatResult(it) }
+                }.map {
+                    it.await()
+                }.joinToString(separator = "\n")
                 sendLog("回复内容: $sendMessage")
                 editTextNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, Bundle().apply {
                     putCharSequence(
@@ -101,12 +105,13 @@ class WechatAccessibilityService : ExAccessibilityService() {
         }
     }
 
-    private fun getReceiveText(): String? {
+    private fun getReceiveText(): List<String> {
         val scrollViewNode =
             rootInActiveWindow.findFirstAccessibilityNodeInfoByClassName("android.widget.ListView")
-                ?: return null
+                ?: return emptyList()
         val chatItemCount = scrollViewNode.childCount
         val screenWidth = rootInActiveWindow?.getBoundsInScreen()?.width().orZero()
+        val receiveList = mutableListOf<String>()
         for (i in chatItemCount - 1 downTo 0) {
             val chatItemNode = scrollViewNode.getChild(i) ?: continue
             val imageNode =
@@ -123,9 +128,12 @@ class WechatAccessibilityService : ExAccessibilityService() {
                 sendLog("倒数第${chatItemCount - i}条聊天不是文本信息，忽略")
                 continue
             }
-            return textNode.text?.toString().orEmpty()
+            val content = textNode.text?.toString().orEmpty()
+            if (content.isNotEmpty()) {
+                receiveList.add(0, content)
+            }
         }
-        return null
+        return receiveList
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -95,7 +95,7 @@ class WechatAccessibilitySettingActivity :
     }
 
     private fun createWechatSettingFloat() {
-        if (EasyFloat.isShow(AppConst.WECHAT_FLOAT_TAG).not()) {
+        if (EasyFloat.getFloatView(AppConst.WECHAT_FLOAT_TAG) == null) {
             EasyFloat.with(this).setLayout(R.layout.wechat_accessibility_setting_float_window)
                 .setDragEnable(false)
                 .setGravity(Gravity.END or Gravity.TOP)
@@ -111,8 +111,7 @@ class WechatAccessibilitySettingActivity :
                         val binding =
                             DataBindingUtil.bind<WechatAccessibilitySettingFloatWindowBinding>(
                                 rootView
-                            )
-                                ?: return@createResult
+                            ) ?: return@createResult
                         binding.closeView.setOnClickListener {
                             EasyFloat.dismiss(AppConst.WECHAT_FLOAT_TAG)
                         }
@@ -123,12 +122,16 @@ class WechatAccessibilitySettingActivity :
                             EventBusManager.post(WechatAccessibilityDeleteWhiteEvent())
                         }
                         binding.listView.adapter = messageAdapter
+                        val launchIntent =
+                            packageManager.getLaunchIntentForPackage("com.tencent.mm")
+                        startActivity(launchIntent)
                     }
                 }
                 .show()
+        } else {
+            val launchIntent = packageManager.getLaunchIntentForPackage("com.tencent.mm")
+            startActivity(launchIntent)
         }
-        val launchIntent = packageManager.getLaunchIntentForPackage("com.tencent.mm")
-        startActivity(launchIntent)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
