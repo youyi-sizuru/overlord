@@ -26,10 +26,14 @@ class MainApplication : Application(), KoinComponent {
     @KoinExperimentalAPI
     override fun onCreate() {
         super.onCreate()
-        DataBindingHelper.DEFAULT_BINDING_VARIABLE = BR.m
         LogUtils.init()
-        EventBusManager.init()
         ToastUtils.init(this)
+        AppConfigsUtils.init(this)
+        if (!isMainProcess()) {
+            return
+        }
+        DataBindingHelper.DEFAULT_BINDING_VARIABLE = BR.m
+        EventBusManager.init()
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@MainApplication)
@@ -48,7 +52,14 @@ class MainApplication : Application(), KoinComponent {
             mihoyoChannel.description = "原神签到是否成功的通知"
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mihoyoChannel)
+            val recordChannel = NotificationChannel(
+                AppConst.RECORD_CHANNEL_ID,
+                "屏幕录制",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            mihoyoChannel.description = "屏幕正在录制的通知"
+            notificationManager.createNotificationChannel(recordChannel)
         }
-        AppConfigsUtils.init(this)
+
     }
 }

@@ -1,6 +1,8 @@
 package com.lifefighter.overlord.action.accessibility.wechat
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Gravity
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
@@ -36,7 +38,16 @@ class WechatAccessibilitySettingActivity :
         viewBinding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.addWhiteButton -> {
-                    createWechatSettingFloat()
+                    if (AccessibilityServiceUtils.isAccessibilityServiceEnabled(
+                            this,
+                            WechatAccessibilityService::class
+                        )
+                    ) {
+                        toast(R.string.service_not_start_tips)
+                        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    } else {
+                        createWechatSettingFloat()
+                    }
                 }
             }
             true

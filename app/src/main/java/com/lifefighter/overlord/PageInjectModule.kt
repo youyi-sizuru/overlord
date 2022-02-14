@@ -1,6 +1,7 @@
 package com.lifefighter.overlord
 
 import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilitySettingActivity
+import com.lifefighter.overlord.action.accessibility.wool.WoolSettingActivity
 import com.lifefighter.overlord.action.sign.AddMihoyoAccountActivity
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
 import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
@@ -17,5 +18,6 @@ object PageInjectModule {
         scope<MihoyoSignConfigActivity> { }
         scope<WallpaperActivity> { }
         scope<WechatAccessibilitySettingActivity> { }
+        scope<WoolSettingActivity> { }
     }
 }

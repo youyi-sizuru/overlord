@@ -11,4 +11,6 @@ object AppConst {
     const val GAME_TYPE = "gameType"
     const val WECHAT_ACCESSIBILITY_SETTING = "wechat_accessibility_setting"
     const val WECHAT_FLOAT_TAG = "wechat_float_tag"
+    const val RECORD_CHANNEL_ID = "record"
+    const val RECORD_SERVICE_ID = 10086
 }

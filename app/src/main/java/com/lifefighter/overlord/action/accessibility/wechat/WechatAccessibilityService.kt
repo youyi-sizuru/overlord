@@ -165,7 +165,7 @@ class WechatAccessibilityService : ExAccessibilityService() {
             val userName = imageNode.contentDescription?.toString()?.removeSuffix("头像").orEmpty()
             if (mWechatAccessibilitySettingData.whiteList.orEmpty().contains(userName).not()) {
                 sendLog("当前对象不在自动聊天列表中，忽略，用户名: $userName")
-                break
+                continue
             }
             val textNode =
                 chatItemNode.findFirstAccessibilityNodeInfoByClassName("android.widget.TextView")
@@ -264,7 +264,7 @@ class WechatAccessibilityService : ExAccessibilityService() {
         val screenWidth = rootInActiveWindow?.getBoundsInScreen()?.width().orZero()
         val imageNode =
             rootInActiveWindow?.findAccessibilityNodeInfosByClassName("android.widget.ImageView")
-                ?.firstOrNull {
+                ?.lastOrNull {
                     it.contentDescription?.toString()?.endsWith("头像")
                         .orFalse() && it.getBoundsInScreen().right < screenWidth / 2
                 }
