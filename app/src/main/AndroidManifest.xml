@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <uses-sdk tools:overrideLibrary="com.lifefighter.ocr" />
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
