@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.lifefighter.overlord"
+        applicationId "com.lifefighter.wool"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -43,9 +42,6 @@ android {
         }
     }
 
-    dataBinding {
-        enabled = true
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -54,24 +50,13 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    kapt {
-        arguments {
-            arg('eventBusIndex', 'com.lifefighter.overlord.AppEventBusIndex')
-        }
-    }
 }
 
 dependencies {
     implementation libraries.kotlinLibraries
     implementation libraries.androidXLibraries
-    implementation libraries.mmkv
-    implementation project(":base")
     implementation project(":utils")
     implementation project(":widget")
     implementation project(":ocr")
-    implementation libraries.database
-    implementation libraries.floatWindow
-    kapt libraries.databaseCompiler
-    kapt libraries.eventbusAnnotationProcessor
-    implementation project(":proxy")
+    compileOnly project(":proxy")
 }
