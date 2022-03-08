@@ -33,7 +33,7 @@ class MainApplication : Application(), KoinComponent {
             return
         }
         DataBindingHelper.DEFAULT_BINDING_VARIABLE = BR.m
-        EventBusManager.init()
+        EventBusManager.init(AppEventBusIndex())
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@MainApplication)
@@ -57,7 +57,7 @@ class MainApplication : Application(), KoinComponent {
                 "屏幕录制",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            mihoyoChannel.description = "屏幕正在录制的通知"
+            recordChannel.description = "屏幕正在录制的通知"
             notificationManager.createNotificationChannel(recordChannel)
         }
 

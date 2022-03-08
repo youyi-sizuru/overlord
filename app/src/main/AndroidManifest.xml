@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-sdk tools:overrideLibrary="com.lifefighter.ocr" />
+    <queries>
+        <package android:name="com.tencent.mm" />
+    </queries>
     <application
         android:name=".MainApplication"
         android:allowBackup="true"

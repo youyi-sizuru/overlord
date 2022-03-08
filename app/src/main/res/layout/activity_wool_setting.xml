@@ -16,8 +16,8 @@
             app:title="@string/wool_setting_title"
             app:titleTextColor="@color/white" />
 
-        <SurfaceView
-            android:id="@+id/surface"
+        <ImageView
+            android:id="@+id/image"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />

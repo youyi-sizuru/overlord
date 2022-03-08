@@ -43,10 +43,10 @@ class WechatAccessibilitySettingActivity :
                             WechatAccessibilityService::class
                         )
                     ) {
+                        createWechatSettingFloat()
+                    } else {
                         toast(R.string.service_not_start_tips)
                         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                    } else {
-                        createWechatSettingFloat()
                     }
                 }
             }
@@ -135,13 +135,21 @@ class WechatAccessibilitySettingActivity :
                         binding.listView.adapter = messageAdapter
                         val launchIntent =
                             packageManager.getLaunchIntentForPackage("com.tencent.mm")
-                        startActivity(launchIntent)
+                        if (launchIntent == null) {
+                            toast("请安装微信")
+                        } else {
+                            startActivity(launchIntent)
+                        }
                     }
                 }
                 .show()
         } else {
             val launchIntent = packageManager.getLaunchIntentForPackage("com.tencent.mm")
-            startActivity(launchIntent)
+            if (launchIntent == null) {
+                toast("请安装微信")
+            } else {
+                startActivity(launchIntent)
+            }
         }
     }
 

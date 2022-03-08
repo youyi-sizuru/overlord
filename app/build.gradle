@@ -54,6 +54,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    kapt {
+        arguments {
+            arg('eventBusIndex', 'com.lifefighter.overlord.AppEventBusIndex')
+        }
+    }
 }
 
 dependencies {
@@ -67,4 +72,5 @@ dependencies {
     implementation libraries.database
     implementation libraries.floatWindow
     kapt libraries.databaseCompiler
+    kapt libraries.eventbusAnnotationProcessor
 }

@@ -105,6 +105,7 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
         val preTime = lastMoveTime ?: now
         lastMoveTime = now
         var moved = (now - preTime) * speed / 1000
+        var checkTimes = 0
         while (true) {
             val collisionMove = game.calculateCollisionMove(this)
             if (collisionMove.move > moved) {
@@ -122,6 +123,14 @@ class Ball(private val game: BricksGame) : DrawAble, ResetAble {
                     360 - angle
                 }
             moved -= collisionMove.move
+            if (collisionMove.move == 0f) {
+                checkTimes++
+            } else {
+                checkTimes = 0
+            }
+            if (checkTimes == 5) {
+                break
+            }
             if (collisionMove.isDead()) {
                 game.reset()
                 break
