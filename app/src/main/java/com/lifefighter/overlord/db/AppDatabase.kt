@@ -11,7 +11,7 @@ import org.koin.dsl.module
  * @author xzp
  * @created on 2021/3/13.
  */
-@Database(entities = [MihoyoAccount::class], version = 2)
+@Database(entities = [MihoyoAccount::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getMihoyoAccountDao(): MihoyoAccountDao
 }

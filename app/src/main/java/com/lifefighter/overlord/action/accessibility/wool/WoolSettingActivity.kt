@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.graphics.*
-import android.hardware.display.DisplayManager
 import android.media.ImageReader
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.os.Message
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.lifefighter.base.BaseActivity
@@ -25,7 +25,7 @@ import kotlinx.coroutines.delay
  */
 class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
     override fun getLayoutId(): Int = R.layout.activity_wool_setting
-    private var mServiceConnection: ServiceConnectionWithService? = null
+    private var mServiceConnection: ServiceConnectionWithMessenger? = null
     private lateinit var mMediaProjectionLauncher: ActivityResultLauncher<Intent>
     private var mScreenImageReader: ImageReader? = null
 
@@ -49,8 +49,8 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 launch {
                     val data = it.data
-                    if (data != null) {
-                        val connection = ServiceConnectionWithService().also {
+                    if (data != null && it.resultCode == RESULT_OK) {
+                        val connection = ServiceConnectionWithMessenger().also {
                             mServiceConnection = it
                         }
                         bindService(
@@ -58,76 +58,15 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
                             connection,
                             Service.BIND_AUTO_CREATE
                         )
-                        val service = connection.getService() as? WoolRecordService
-                        val screenPoint = getScreenRealSize()
-                        val mediaProjection = service?.startRecord(it.resultCode, data)
-
-                        mediaProjection?.createVirtualDisplay(
-                            "record",
-                            screenPoint.x,
-                            screenPoint.y,
-                            1,
-                            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC,
-                            ImageReader.newInstance(
-                                screenPoint.x,
-                                screenPoint.y,
-                                PixelFormat.RGBA_8888,
-                                2
-                            ).also {
-                                mScreenImageReader = it
-                            }.surface, null, null
-                        )
+                        connection.sendMessage(Message.obtain().also {
+                            it.what = WoolRecordService.WHAT_START_RECORD
+                            it.obj = data
+                        })
                     }
                 }
             }
         launch {
-            OcrLibrary.initLibrary(assets)
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-            paint.color = Color.BLUE
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = dp2px(3).toFloat()
-            while (true) {
-                val image = bg { tryOrNull { mScreenImageReader?.acquireLatestImage() } }
-                if (image != null) {
-                    val screenBitmap = bg {
-                        tryOrNull {
-                            val width = image.width
-                            val height = image.height
-                            val plane = image.planes[0]
-                            val pixelStride = plane.pixelStride
-                            val rowStride = plane.rowStride
-                            val rowPadding = rowStride - pixelStride * width
-                            Bitmap.createBitmap(
-                                width + rowPadding / pixelStride,
-                                height,
-                                Bitmap.Config.ARGB_8888
-                            ).also {
-                                it.copyPixelsFromBuffer(plane.buffer)
-                            }
-                        }
-                    }
-                    if (screenBitmap != null) {
-                        val resultArray = OcrLibrary.detectBitmap(screenBitmap, true).orEmpty()
-                        val resultBitmap = Bitmap.createBitmap(
-                            screenBitmap.width,
-                            screenBitmap.height,
-                            Bitmap.Config.RGB_565
-                        )
-                        val canvas = Canvas(resultBitmap)
-                        canvas.drawBitmap(screenBitmap, 0f, 0f, null)
-                        for (result in resultArray) {
-                            canvas.drawRect(
-                                RectF(result.x0, result.y0, result.x2, result.y2),
-                                paint
-                            )
-                        }
-                        viewBinding.image.setImageBitmap(resultBitmap)
-                    }
 
-                    image.close()
-                }
-                delay(2000)
-            }
         }
     }
 

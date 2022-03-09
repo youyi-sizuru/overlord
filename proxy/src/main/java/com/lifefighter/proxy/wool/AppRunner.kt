@@ -1,5 +1,6 @@
 package com.lifefighter.proxy.wool
 
+import android.graphics.Bitmap
 import android.media.Image
 import com.lifefighter.widget.accessibility.ExAccessibilityService
 
@@ -18,5 +19,5 @@ interface AppRunner {
 
 abstract class AppRunnerAccessibilityService : ExAccessibilityService() {
 
-    abstract fun acquireScreenShot(): Image
+    abstract fun acquireScreenShot(): Bitmap?
 }

@@ -87,6 +87,7 @@
         <service
             android:name=".action.accessibility.wool.WoolRecordService"
             android:exported="false"
+            android:process="com.lifefighter.app.wool"
             android:foregroundServiceType="mediaProjection" />
     </application>
 
