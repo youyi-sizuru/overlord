@@ -53,10 +53,5 @@ android {
 }
 
 dependencies {
-    implementation libraries.kotlinLibraries
-    implementation libraries.androidXLibraries
-    implementation project(":utils")
-    implementation project(":widget")
-    implementation project(":ocr")
-    compileOnly project(":proxy")
+    implementation project(":woolLibrary")
 }

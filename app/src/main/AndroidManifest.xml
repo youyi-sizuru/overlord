@@ -14,6 +14,10 @@
     <uses-sdk tools:overrideLibrary="com.lifefighter.ocr" />
     <queries>
         <package android:name="com.tencent.mm" />
+        <package android:name="com.taobao.taobao" />
+        <package android:name="com.eg.android.AlipayGphone" />
+        <package android:name="com.jingdong.app.mall" />
+        <package android:name="com.jd.jrapp" />
     </queries>
     <application
         android:name=".MainApplication"
@@ -76,6 +80,7 @@
         <service
             android:name=".action.accessibility.wechat.WechatAccessibilityService"
             android:exported="true"
+            android:label="@string/wechat_support_title"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -87,8 +92,22 @@
         <service
             android:name=".action.accessibility.wool.WoolRecordService"
             android:exported="false"
-            android:process="com.lifefighter.app.wool"
+            android:process=":wool"
             android:foregroundServiceType="mediaProjection" />
+
+        <service
+            android:name=".action.accessibility.wool.WoolAccessibilityService"
+            android:exported="true"
+            android:process=":wool"
+            android:label="@string/wool_setting_title"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/wool_accessibility" />
+        </service>
     </application>
 
 </manifest>

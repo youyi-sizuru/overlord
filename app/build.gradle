@@ -74,4 +74,5 @@ dependencies {
     kapt libraries.databaseCompiler
     kapt libraries.eventbusAnnotationProcessor
     implementation project(":proxy")
+    debugImplementation project(":woolLibrary")
 }

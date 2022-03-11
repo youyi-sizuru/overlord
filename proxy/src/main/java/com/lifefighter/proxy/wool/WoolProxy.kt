@@ -5,5 +5,5 @@ package com.lifefighter.proxy.wool
  * @created on 2022/3/8.
  */
 interface WoolProxy {
-    fun getAppRunner(appName: String): AppRunner?
+    fun getAppRunner(service: AppRunnerService, appName: String): AppRunner?
 }

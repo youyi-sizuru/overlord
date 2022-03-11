@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="m"
+            type="com.lifefighter.overlord.action.accessibility.wool.WoolSettingActivity.Model" />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,11 +24,12 @@
             app:title="@string/wool_setting_title"
             app:titleTextColor="@color/white" />
 
-        <ImageView
-            android:id="@+id/image"
+        <com.lifefighter.widget.list.ExRecyclerView
+            android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <com.lifefighter.widget.button.ExButton
             android:id="@+id/start"
@@ -28,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/default_padding_horizontal"
             android:layout_marginVertical="@dimen/default_padding_vertical"
-            android:text="开始录屏"
-            android:textColor="@color/white" />
+            android:text="@{m.startNameData}"
+            android:textColor="@color/white"
+            tools:text="开始" />
     </LinearLayout>
 </layout>

@@ -9,4 +9,5 @@ project(":utils").projectDir = file("treasure-box/utils")
 include ':ocr'
 project(":ocr").projectDir = file("treasure-box/ocr")
 include ':proxy'
-include ':wool'
+include ':woolApk'
+include ':woolLibrary'

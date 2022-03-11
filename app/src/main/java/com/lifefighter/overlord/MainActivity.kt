@@ -82,6 +82,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                 }
             }
             3L -> {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    toast("系统版本过低，请更新系统至android 7.0以上")
+                    return
+                }
                 route(WoolSettingActivity::class)
             }
         }

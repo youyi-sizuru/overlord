@@ -1,8 +1,9 @@
 package com.lifefighter.proxy.wool
 
+import android.content.Context
 import android.graphics.Bitmap
-import android.media.Image
-import com.lifefighter.widget.accessibility.ExAccessibilityService
+import android.graphics.Point
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * @author xzp
@@ -10,14 +11,21 @@ import com.lifefighter.widget.accessibility.ExAccessibilityService
  */
 interface AppRunner {
 
-    fun startWith(service: AppRunnerAccessibilityService)
-
-
-    fun destroy()
+    suspend fun start()
 }
 
 
-abstract class AppRunnerAccessibilityService : ExAccessibilityService() {
+interface AppRunnerService : CoroutineScope {
 
-    abstract fun acquireScreenShot(): Bitmap?
+    fun acquireScreenShot(): Bitmap?
+
+    fun touchPoint(point: Point)
+
+    fun scrollTo(from: Point, to: Point)
+
+    fun stop()
+
+    fun getContext(): Context
+
+    fun getAccessibilityPackageName(): String?
 }

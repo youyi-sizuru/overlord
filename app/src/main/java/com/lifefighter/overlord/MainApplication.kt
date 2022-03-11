@@ -29,11 +29,11 @@ class MainApplication : Application(), KoinComponent {
         LogUtils.init()
         ToastUtils.init(this)
         AppConfigsUtils.init(this)
+        EventBusManager.init(AppEventBusIndex())
         if (!isMainProcess()) {
             return
         }
         DataBindingHelper.DEFAULT_BINDING_VARIABLE = BR.m
-        EventBusManager.init(AppEventBusIndex())
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@MainApplication)
@@ -41,7 +41,6 @@ class MainApplication : Application(), KoinComponent {
             modules(NetUtils.module, AppInterfaceModule.module)
             modules(PageInjectModule.module)
             modules(AppDatabaseModule.module)
-
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mihoyoChannel = NotificationChannel(
