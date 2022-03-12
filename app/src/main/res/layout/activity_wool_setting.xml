@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             android:background="?colorPrimary"
+            app:menu="@menu/wool_setting_config"
             app:title="@string/wool_setting_title"
             app:titleTextColor="@color/white" />
 

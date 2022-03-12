@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.lifefighter.base.BaseActivity
+import com.lifefighter.base.alert
+import com.lifefighter.base.withLoadingDialog
 import com.lifefighter.overlord.AppConst
 import com.lifefighter.overlord.R
 import com.lifefighter.overlord.databinding.ActivityWoolSettingBinding
@@ -24,6 +26,10 @@ import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
 import com.lzf.easyfloat.EasyFloat
 import com.lzf.easyfloat.enums.ShowPattern
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
 
 
 /**
@@ -40,6 +46,12 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
         model = Model()
         viewBinding.m = model
+        viewBinding.toolbar.setOnMenuItemClickListener {
+            if (it.itemId == R.id.download) {
+                downloadWoolApk()
+            }
+            true
+        }
         woolAppAdapter = DataBindingAdapter().apply {
             addItemBinder(
                 ViewItemBinder<WoolAppModel, WoolAppItemBinding>(
@@ -72,6 +84,12 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
             if (serviceConnection != null) {
                 unBindService()
 
+                return@setOnClickListener
+            }
+            if (checkWoolApk().not()) {
+                alert("您需要先下载运行包", positiveText = "确定", negativeText = "取消") {
+                    downloadWoolApk()
+                }
                 return@setOnClickListener
             }
             if (AccessibilityServiceUtils.isAccessibilityServiceEnabled(
@@ -160,6 +178,54 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
                 }
                 .show()
         }
+    }
+
+    private fun checkWoolApk(): Boolean {
+        val woolApkFile = File(filesDir, AppConst.WOOL_APK_PATH)
+        if (woolApkFile.exists()) {
+            return true
+        }
+        return false
+    }
+
+    private fun downloadWoolApk() {
+        launch(failure = {
+            toast("下载失败，请重试，error: ${it.message}")
+        }) {
+            bg {
+                val woolApkFile = File(filesDir, AppConst.WOOL_APK_PATH)
+                if (woolApkFile.exists()) {
+                    woolApkFile.delete()
+                }
+                val tempFile = File(filesDir, AppConst.WOOL_APK_PATH.plus(".temp"))
+                if (tempFile.exists()) {
+                    tempFile.delete()
+                }
+                tempFile.parentFile?.mkdirs()
+                val httpClient = get<OkHttpClient>()
+                val response = httpClient.newCall(
+                    Request.Builder()
+                        .url("https://raw.githubusercontent.com/youyi-sizuru/overlord/main/outputs/wool.apk")
+                        .get().build()
+                ).execute()
+                if (response.isSuccessful.not()) {
+                    ui {
+                        toast("下载失败，请重试, code: ${response.code()}")
+                    }
+                    return@bg
+                }
+                response.body()?.use { body ->
+                    body.byteStream().use { inputStream ->
+                        tempFile.createNewFile()
+                        FileOutputStream(tempFile).use {
+                            inputStream.copyTo(it)
+                        }
+                    }
+                }
+                tempFile.renameTo(woolApkFile)
+            }
+            toast("下载成功")
+        }.withLoadingDialog(this)
     }
 
     private fun unBindService() {

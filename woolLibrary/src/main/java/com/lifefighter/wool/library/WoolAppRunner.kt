@@ -3,10 +3,7 @@ package com.lifefighter.wool.library
 import com.lifefighter.ocr.OcrLibrary
 import com.lifefighter.proxy.wool.AppRunner
 import com.lifefighter.proxy.wool.AppRunnerService
-import com.lifefighter.utils.bg
-import com.lifefighter.utils.logDebug
-import com.lifefighter.utils.logError
-import com.lifefighter.utils.ui
+import com.lifefighter.utils.*
 import kotlinx.coroutines.delay
 
 /**
@@ -17,7 +14,7 @@ abstract class WoolAppRunner(private val service: AppRunnerService, private val 
     AppRunner {
     override suspend fun start() {
         while (checkNode()) {
-            delay(1)
+            delay(100)
             continue
         }
     }
@@ -46,7 +43,6 @@ abstract class WoolAppRunner(private val service: AppRunnerService, private val 
         }
         return@bg true
     }
-    abstract class
 
     protected suspend fun startApp() = ui {
         try {

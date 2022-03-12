@@ -53,13 +53,7 @@ object AppInterfaceModule {
             SignWork(get(), get(), get(), workerParameters)
         }
         single(qualifier = AI_QUALIFIER) {
-            Retrofit.Builder().client(
-                OkHttpClient.Builder().addInterceptor(HttpLoggingInterceptor {
-                    logDebug(it)
-                }.apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }).connectTimeout(10, TimeUnit.SECONDS).build()
-            ).addConverterFactory(ScalarsConverterFactory.create())
+            Retrofit.Builder().client(get()).addConverterFactory(ScalarsConverterFactory.create())
                 .baseUrl("https://www.tuling123.com").build()
         }
         single {
