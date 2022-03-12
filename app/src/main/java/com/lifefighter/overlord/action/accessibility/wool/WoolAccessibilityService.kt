@@ -41,6 +41,10 @@ class WoolAccessibilityService : ExAccessibilityService() {
         scrollTo(event.from, event.to)
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onEvent(event: AccessibilityGlobalEvent) {
+        performGlobalAction(event.action)
+    }
 
 }
 

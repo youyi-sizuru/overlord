@@ -23,6 +23,8 @@ interface AppRunnerService : CoroutineScope {
 
     fun scrollTo(from: Point, to: Point)
 
+    fun sendGlobalAction(action: Int)
+
     fun stop()
 
     fun getContext(): Context

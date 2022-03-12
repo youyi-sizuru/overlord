@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.*
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.os.Handler
 import android.os.Message
 import android.provider.Settings
 import android.view.Gravity
@@ -30,6 +31,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.ref.WeakReference
 
 
 /**
@@ -121,9 +123,10 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
                 launch {
                     val data = it.data
                     if (data != null && it.resultCode == RESULT_OK) {
-                        val connection = ServiceConnectionWithMessenger().also {
-                            model.mServiceConnectionData.value = it
-                        }
+                        val connection =
+                            ServiceConnectionWithMessenger(MessageReceiver(this@WoolSettingActivity)).also {
+                                model.mServiceConnectionData.value = it
+                            }
                         bindService(
                             Intent(this@WoolSettingActivity, WoolRecordService::class.java),
                             connection,
@@ -248,6 +251,18 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
         val serviceStartData = mServiceConnectionData.map {
             it != null
         }
+    }
+
+    class MessageReceiver(activity: WoolSettingActivity) : Handler.Callback {
+        private val activityRef = WeakReference(activity)
+        override fun handleMessage(msg: Message): Boolean {
+            if (msg.what == WoolRecordService.WHAT_END_RECORD) {
+                activityRef.get()?.unBindService()
+                return true
+            }
+            return false
+        }
+
     }
 }
 

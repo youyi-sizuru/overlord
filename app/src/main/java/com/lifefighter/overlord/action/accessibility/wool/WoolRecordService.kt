@@ -34,12 +34,15 @@ import java.io.File
 class WoolRecordService : BaseService(), AppRunnerService {
     private var mMediaProjection: MediaProjection? = null
     private var mScreenImageReader: ImageReader? = null
+    private var mClientReceiver: Messenger? = null
     private val mDiffProgressMessenger: Messenger by lazy {
         Messenger(Handler(Looper.getMainLooper()) { message ->
             if (message.what == WHAT_START_RECORD) {
+                mClientReceiver = message.replyTo
                 logDebug("$TAG start record")
                 if (mMediaProjection == null) {
                     val recordIntent = message.obj as? Intent
+
                     if (recordIntent != null) {
                         val mediaProjectionManager =
                             getSystemService(MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
@@ -111,9 +114,7 @@ class WoolRecordService : BaseService(), AppRunnerService {
 
     private fun startRunners() {
         launch(final = {
-            mDiffProgressMessenger.send(Message.obtain().apply {
-                what = WHAT_END_RECORD
-            })
+            stop()
         }) {
             val packageNames =
                 AppConfigsUtils.getString(AppConst.WOOL_APP_PACKAGE_NAMES, null) ?: return@launch
@@ -177,8 +178,12 @@ class WoolRecordService : BaseService(), AppRunnerService {
         EventBusManager.post(AccessibilityScrollEvent(from, to))
     }
 
+    override fun sendGlobalAction(action: Int) {
+        EventBusManager.post(AccessibilityGlobalEvent(action))
+    }
+
     override fun stop() {
-        mDiffProgressMessenger.send(Message.obtain(null, WHAT_END_RECORD))
+        mClientReceiver?.send(Message.obtain(null, WHAT_END_RECORD))
     }
 
     override fun getContext(): Context {

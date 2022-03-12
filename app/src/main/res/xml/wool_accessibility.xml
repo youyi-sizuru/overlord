@@ -5,6 +5,7 @@
     android:accessibilityFlags="flagReportViewIds"
     android:canPerformGestures="true"
     android:canRetrieveWindowContent="true"
+    android:canRequestFilterKeyEvents="true"
     android:description="@string/wool_setting_title"
-    android:notificationTimeout="500"
+    android:notificationTimeout="100"
     android:settingsActivity="com.lifefighter.overlord.action.accessibility.wool.WoolSettingActivity" />
