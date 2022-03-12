@@ -29,11 +29,11 @@ android {
 }
 
 dependencies {
-    implementation libraries.kotlinLibraries
-    implementation libraries.androidXLibraries
-    implementation project(":base")
-    implementation project(":utils")
-    implementation project(":widget")
-    implementation project(":ocr")
+    compileOnly libraries.kotlinLibraries
+    compileOnly libraries.androidXLibraries
+    compileOnly project(":base")
+    compileOnly project(":utils")
+    compileOnly project(":widget")
+    compileOnly project(":ocr")
     compileOnly project(":proxy")
 }

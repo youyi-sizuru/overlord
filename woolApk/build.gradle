@@ -50,6 +50,32 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+
+            if (outputFile == null) {
+                return
+            }
+            def fileName = outputFile.name as String
+            if (fileName.endsWith(".apk") && fileName.contains("release")) {
+                println outputFile.name
+                println variant.name
+                variant.assemble.doLast {
+                    if (!outputFile.exists()) {
+                        println "file not exists"
+                    } else {
+                        project.copy {
+                            from outputFile
+                            into file(rootProject.projectDir.path + "/outputs")
+                            rename(outputFile.name, "wool.apk")
+                        }
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 dependencies {

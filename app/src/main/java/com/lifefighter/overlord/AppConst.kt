@@ -14,4 +14,6 @@ object AppConst {
     const val RECORD_CHANNEL_ID = "record"
     const val RECORD_SERVICE_ID = 10086
     const val WOOL_APP_PACKAGE_NAMES = "wool_app_package_names"
+    const val WOOL_FLOAT_TAG = "wool_float_tag"
+    const val WOOL_APK_PATH = "wool/wool.apk"
 }

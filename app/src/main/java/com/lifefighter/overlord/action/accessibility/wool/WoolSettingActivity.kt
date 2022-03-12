@@ -1,6 +1,5 @@
 package com.lifefighter.overlord.action.accessibility.wool
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.graphics.*
@@ -8,18 +7,23 @@ import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.os.Message
 import android.provider.Settings
+import android.view.Gravity
+import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.overlord.AppConst
 import com.lifefighter.overlord.R
 import com.lifefighter.overlord.databinding.ActivityWoolSettingBinding
 import com.lifefighter.overlord.databinding.WoolAppItemBinding
+import com.lifefighter.overlord.databinding.WoolSettingFloatWindowBinding
 import com.lifefighter.utils.*
 import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
-import kotlinx.coroutines.delay
+import com.lzf.easyfloat.EasyFloat
+import com.lzf.easyfloat.enums.ShowPattern
 
 
 /**
@@ -33,7 +37,6 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
     private lateinit var model: Model
     private lateinit var woolAppAdapter: DataBindingAdapter
 
-    @SuppressLint("WrongConstant")
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
         model = Model()
         viewBinding.m = model
@@ -67,8 +70,8 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
         viewBinding.start.setOnClickListener {
             val serviceConnection = model.mServiceConnectionData.value
             if (serviceConnection != null) {
-                model.mServiceConnectionData.value = null
-                unbindService(serviceConnection)
+                unBindService()
+
                 return@setOnClickListener
             }
             if (AccessibilityServiceUtils.isAccessibilityServiceEnabled(
@@ -93,14 +96,7 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
                 selectedApp.joinToString(separator = ",") {
                     it.packageName
                 })
-            val mediaProjectionManager =
-                getSystemService(MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
-            if (mediaProjectionManager != null) {
-                val captureIntent: Intent = mediaProjectionManager.createScreenCaptureIntent()
-                mMediaProjectionLauncher.launch(captureIntent)
-            } else {
-                toast("找不到录制服务")
-            }
+            createWoolSettingFloat()
         }
         mMediaProjectionLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -115,24 +111,76 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
                             connection,
                             Service.BIND_AUTO_CREATE
                         )
-                        connection.sendMessage(Message.obtain(null, WoolRecordService.WHAT_START_RECORD, data))
+                        connection.sendMessage(
+                            Message.obtain(
+                                null,
+                                WoolRecordService.WHAT_START_RECORD,
+                                data
+                            )
+                        )
                     }
                 }
             }
     }
 
+    private fun createWoolSettingFloat() {
+        if (EasyFloat.getFloatView(AppConst.WOOL_FLOAT_TAG) == null) {
+            EasyFloat.with(this).setLayout(R.layout.wool_setting_float_window)
+                .setDragEnable(false)
+                .setGravity(Gravity.END or Gravity.TOP)
+                .setTag(AppConst.WOOL_FLOAT_TAG)
+                .setShowPattern(ShowPattern.ALL_TIME)
+                .registerCallback {
+                    createResult { isCreate, msg, view ->
+                        if (isCreate.not() || view == null) {
+                            logError(msg)
+                            toast("无法创建悬浮窗，请确定是否打开悬浮窗权限")
+                            return@createResult
+                        }
+                        val rootView = (view as ViewGroup).getChildAt(0)
+                        val binding =
+                            DataBindingUtil.bind<WoolSettingFloatWindowBinding>(
+                                rootView
+                            ) ?: return@createResult
+                        binding.m = model
+                        binding.lifecycleOwner = this@WoolSettingActivity
+                        binding.stopView.setOnClickListener {
+                            unBindService()
+                        }
+                        val mediaProjectionManager =
+                            getSystemService(MEDIA_PROJECTION_SERVICE) as? MediaProjectionManager
+                        if (mediaProjectionManager != null) {
+                            val captureIntent: Intent =
+                                mediaProjectionManager.createScreenCaptureIntent()
+                            mMediaProjectionLauncher.launch(captureIntent)
+                        } else {
+                            toast("找不到录制服务")
+                        }
+                    }
+                }
+                .show()
+        }
+    }
 
-    override fun onLifecycleDestroy() {
+    private fun unBindService() {
         model.mServiceConnectionData.value?.let {
             unbindService(it)
         }
         model.mServiceConnectionData.value = null
+        EasyFloat.dismiss(AppConst.WOOL_FLOAT_TAG)
+    }
+
+    override fun onLifecycleDestroy() {
+        unBindService()
     }
 
     inner class Model {
         val mServiceConnectionData = ExLiveData<ServiceConnectionWithMessenger?>(null)
         val startNameData = mServiceConnectionData.map {
             if (it == null) "开始" else "结束"
+        }
+        val serviceStartData = mServiceConnectionData.map {
+            it != null
         }
     }
 }

@@ -19,10 +19,12 @@ import com.lifefighter.ocr.OcrLibrary
 import com.lifefighter.overlord.AppConst
 import com.lifefighter.overlord.R
 import com.lifefighter.proxy.wool.AppRunnerService
+import com.lifefighter.proxy.wool.WoolProxy
 import com.lifefighter.utils.*
-import com.lifefighter.wool.library.WoolProxyImpl
+import dalvik.system.DexClassLoader
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.io.File
 
 /**
  * @author xzp
@@ -116,13 +118,28 @@ class WoolRecordService : BaseService(), AppRunnerService {
             val packageNames =
                 AppConfigsUtils.getString(AppConst.WOOL_APP_PACKAGE_NAMES, null) ?: return@launch
             val packageNameList = packageNames.split(",")
+            val woolApk = File(filesDir, AppConst.WOOL_APK_PATH)
+            val woolProxy: WoolProxy? =
+                bg {
+                    tryOrNull {
+                        val woolProxyClass =
+                            classLoader.loadClass("com.lifefighter.wool.library.WoolProxyImpl")
+                        woolProxyClass.newInstance() as? WoolProxy
+                    } ?: kotlin.run {
+                        if (woolApk.exists() && woolApk.canRead()) {
+                            val woolClassLoader =
+                                DexClassLoader(woolApk.absolutePath, null, null, classLoader)
+                            val woolProxyClass =
+                                woolClassLoader.loadClass("com.lifefighter.wool.library.WoolProxyImpl")
+                            woolProxyClass.newInstance() as? WoolProxy
+                        } else {
+                            null
+                        }
+                    }
+                }
             for (packageName in packageNameList) {
                 logDebug("$TAG start runner: $packageName")
-                val runner = if (BuildConfig.DEBUG) {
-                    WoolProxyImpl().getAppRunner(this@WoolRecordService, packageName)
-                } else {
-                    null
-                }
+                val runner = woolProxy?.getAppRunner(this@WoolRecordService, packageName)
                 runner?.start()
             }
         }
