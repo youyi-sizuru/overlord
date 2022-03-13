@@ -1,5 +1,5 @@
 <p align="center">
- <img src="./doc/overlord_logo.png" align="middle" width = "600"/>
+ <img src="./doc/overlord_logo.png" align="middle" width="600"/>
 <p align="center">
 <img src="https://img.shields.io/badge/-%E9%AA%A8%E7%8E%8B%E4%B8%87%E5%B2%81-f00.svg" align="middle" />
 
@@ -25,4 +25,4 @@
 
 如果你对本库有兴趣，麻烦给个**star**，非常感谢。
 
-<img src="./doc/albedo-anime.gif" align="left" width = "100"/>
+<img src="./doc/albedo-anime.gif" align="left" width="100"/>
