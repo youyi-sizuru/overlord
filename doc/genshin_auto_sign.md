@@ -4,4 +4,4 @@
 
 ## 使用示例
 
-<video src="D:\projects\AndroidStudioProjects\overlord\doc\genshin_auto_sign_example.mp4" width="480" height="1080" align="left"/>
+<video src="./doc/genshin_auto_sign_example.mp4" width="480" height="1080" align="left"/>
