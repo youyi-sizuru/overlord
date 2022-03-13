@@ -4,4 +4,4 @@
 
 ## 使用示例
 
-https://raw.githubusercontent.com/youyi-sizuru/overlord/main/doc/genshin_auto_sign_example.mp4
+<img src="./genshin_auto_sign_example.gif" align="left" width="488"/>
