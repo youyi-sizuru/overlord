@@ -8,4 +8,5 @@
     android:canRequestFilterKeyEvents="true"
     android:description="@string/wool_setting_title"
     android:notificationTimeout="100"
+    android:packageNames="com.taobao.taobao,com.eg.android.AlipayGphone,com.jingdong.app.mall,com.jd.jrapp"
     android:settingsActivity="com.lifefighter.overlord.action.accessibility.wool.WoolSettingActivity" />

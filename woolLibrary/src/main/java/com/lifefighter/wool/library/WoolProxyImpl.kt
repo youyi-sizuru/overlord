@@ -13,7 +13,7 @@ class WoolProxyImpl : WoolProxy {
         return when (appName) {
             "com.taobao.taobao" -> TaobaoAppRunner(service)
             "com.eg.android.AlipayGphone" -> null
-            "com.jingdong.app.mall" -> null
+            "com.jingdong.app.mall" -> JDAppRunner(service)
             "com.jd.jrapp" -> null
             else -> null
         }

@@ -88,14 +88,14 @@ class MihoyoRequestInterceptor : Interceptor {
                 .replace("-", "").toUpperCase(Locale.getDefault())
         )
         requestBuilder.addHeader("x-rpc-client_type", "5")
-        requestBuilder.addHeader("x-rpc-app_version", "2.3.0")
+        requestBuilder.addHeader("x-rpc-app_version", "2.34.1")
         requestBuilder.addHeader("DS", createDs())
         val newRequest = requestBuilder.build()
         return chain.proceed(newRequest)
     }
 
     private fun createDs(): String {
-        val n = "h8w582wxwgqvahcdkpvdhbh2w9casgfl"
+        val n = "9nQiU3AV0rJSIBWgdynfoGMGKaklfbM7"
         val i = System.currentTimeMillis().div(1000).toString()
         val r = (1..6)
             .map { kotlin.random.Random.nextInt(0, charList.size) }

@@ -88,11 +88,15 @@ class WoolSettingActivity : BaseActivity<ActivityWoolSettingBinding>() {
 
                 return@setOnClickListener
             }
-            if (checkWoolApk().not()) {
-                alert("您需要先下载运行包", positiveText = "确定", negativeText = "取消") {
-                    downloadWoolApk()
+            if (tryOrNull {
+                    classLoader.loadClass("com.lifefighter.wool.library.WoolProxyImpl")
+                } == null) {
+                if (checkWoolApk().not()) {
+                    alert("您需要先下载运行包", positiveText = "确定", negativeText = "取消") {
+                        downloadWoolApk()
+                    }
+                    return@setOnClickListener
                 }
-                return@setOnClickListener
             }
             if (AccessibilityServiceUtils.isAccessibilityServiceEnabled(
                     this,

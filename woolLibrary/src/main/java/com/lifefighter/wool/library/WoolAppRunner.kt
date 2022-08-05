@@ -9,6 +9,7 @@ import com.lifefighter.proxy.wool.AppRunner
 import com.lifefighter.proxy.wool.AppRunnerService
 import com.lifefighter.utils.*
 import kotlinx.coroutines.delay
+import java.io.File
 
 
 /**
@@ -85,10 +86,11 @@ abstract class WoolAppRunner(protected val service: AppRunnerService, private va
 
     suspend fun findTextByPattern(patternStr: String): List<OcrResult> = bg {
         val bitmap = service.acquireScreenShot() ?: return@bg emptyList()
-        val results = OcrLibrary.detectBitmap(bitmap, true).orEmpty()
+        val results = OcrLibrary.detectBitmap(bitmap, false).orEmpty()
         val pattern = patternStr.toPattern()
         results.filter {
-            pattern.matcher(it.text.orEmpty()).matches()
+            val text = it.text.orEmpty().replace("\n", "").replace("\r", "")
+            pattern.matcher(text).matches()
         }.toList()
     }
 
