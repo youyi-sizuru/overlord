@@ -69,7 +69,7 @@ class MihoyoRequestInterceptor : Interceptor {
         val requestBuilder = oldRequest.newBuilder()
         requestBuilder.addHeader(
             "User-Agent",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.3.0"
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1"
         )
         requestBuilder.addHeader(
             "Referer",

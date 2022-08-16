@@ -262,7 +262,7 @@ class SignWork(
         val TAG = SignWork::class.java.name
         fun startWork(context: Context) {
             val request = PeriodicWorkRequestBuilder<SignWork>(
-                2,
+                1,
                 TimeUnit.HOURS
             ).addTag(TAG).build()
             WorkManager.getInstance(context)

@@ -68,11 +68,8 @@ dependencies {
     implementation project(":base")
     implementation project(":utils")
     implementation project(":widget")
-    implementation project(":ocr")
     implementation libraries.database
     implementation libraries.floatWindow
     kapt libraries.databaseCompiler
     kapt libraries.eventbusAnnotationProcessor
-    implementation project(":proxy")
-    debugImplementation project(":woolLibrary")
 }

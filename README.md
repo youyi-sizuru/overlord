@@ -17,7 +17,6 @@
 
 [微信机器人自动回复](./doc/wechat_auto_reply.md)
 
-[淘宝、京东等活动羊毛（开发中）](./doc/wool.md)
 
 ## 感谢
 

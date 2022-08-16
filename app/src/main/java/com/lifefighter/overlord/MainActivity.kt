@@ -11,7 +11,6 @@ import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.string
 import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilityService
 import com.lifefighter.overlord.action.accessibility.wechat.WechatAccessibilitySettingActivity
-import com.lifefighter.overlord.action.accessibility.wool.WoolSettingActivity
 import com.lifefighter.overlord.action.sign.MihoyoSignConfigActivity
 import com.lifefighter.overlord.action.wallpaper.WallpaperActivity
 import com.lifefighter.overlord.databinding.ActivityMainBinding
@@ -39,7 +38,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         adapter.addData(ToolData(0, string(R.string.mihoyo_auto_sign_title)))
         adapter.addData(ToolData(1, string(R.string.wallpaper_title)))
         adapter.addData(ToolData(2, string(R.string.wechat_support_title)))
-        adapter.addData(ToolData(3, string(R.string.wool_setting_title)))
         viewBinding.list.adapter = adapter
         viewBinding.list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
     }
@@ -80,13 +78,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
                     toast(R.string.service_not_start_tips)
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }
-            }
-            3L -> {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                    toast("系统版本过低，请更新系统至android 7.0以上")
-                    return
-                }
-                route(WoolSettingActivity::class)
             }
         }
     }
