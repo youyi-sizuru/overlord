@@ -69,7 +69,7 @@ class MihoyoRequestInterceptor : Interceptor {
         val requestBuilder = oldRequest.newBuilder()
         requestBuilder.addHeader(
             "User-Agent",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.34.1"
+            "Mozilla/5.0 (Linux; Android 10; MIX 2 Build/QKQ1.190825.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.101 Mobile Safari/537.36 miHoYoBBS/2.35.2"
         )
         requestBuilder.addHeader(
             "Referer",
@@ -88,14 +88,14 @@ class MihoyoRequestInterceptor : Interceptor {
                 .replace("-", "").toUpperCase(Locale.getDefault())
         )
         requestBuilder.addHeader("x-rpc-client_type", "5")
-        requestBuilder.addHeader("x-rpc-app_version", "2.34.1")
+        requestBuilder.addHeader("x-rpc-app_version", "2.35.2")
         requestBuilder.addHeader("DS", createDs())
         val newRequest = requestBuilder.build()
         return chain.proceed(newRequest)
     }
 
     private fun createDs(): String {
-        val n = "9nQiU3AV0rJSIBWgdynfoGMGKaklfbM7"
+        val n = "N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep"
         val i = System.currentTimeMillis().div(1000).toString()
         val r = (1..6)
             .map { kotlin.random.Random.nextInt(0, charList.size) }
