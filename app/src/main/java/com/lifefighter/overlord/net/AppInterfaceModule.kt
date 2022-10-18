@@ -18,12 +18,14 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.GET
 import java.lang.reflect.Type
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 /**
  * @author xzp
@@ -42,8 +44,9 @@ object AppInterfaceModule {
                         level = HttpLoggingInterceptor.Level.BODY
                     })
                     .build()
-            ).addConverterFactory(MihoyoDataConverterFactory()).addConverterFactory(
-                GsonConverterFactory.create(JsonUtils.gson)
+            ).addConverterFactory(MihoyoDataConverterFactory())
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(JsonUtils.gson)
             ).baseUrl("https://api-takumi.mihoyo.com").build()
         }
         single {
@@ -65,11 +68,17 @@ object AppInterfaceModule {
 class MihoyoRequestInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val oldRequest = chain.request()
+        if(oldRequest.url().host().contains("mihoyo").not()){
+            return chain.proceed(oldRequest)
+        }
         val cookie = oldRequest.header("Cookie").orEmpty()
         val requestBuilder = oldRequest.newBuilder()
         requestBuilder.addHeader(
             "User-Agent",
-            "Mozilla/5.0 (Linux; Android 10; MIX 2 Build/QKQ1.190825.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.101 Mobile Safari/537.36 miHoYoBBS/2.35.2"
+            "Mozilla/5.0 (Linux; Android 10; MIX 2 Build/QKQ1.190825.002; wv) " +
+                    "AppleWebKit/537.36 (KHTML, like Gecko)" +
+                    " Version/4.0 Chrome/83.0.${Random.nextInt(1, 100)}.${Random.nextInt(100, 1000)}" +
+                    " Mobile Safari/537.36 miHoYoBBS/2.35.${Random.nextInt(1, 10)}"
         )
         requestBuilder.addHeader(
             "Referer",
@@ -120,8 +129,14 @@ class MihoyoDataConverterFactory : Converter.Factory() {
         type: Type,
         annotations: Array<Annotation>,
         retrofit: Retrofit
-    ): Converter<ResponseBody, *> {
-        return MihoyoDataConverter<Any>(type)
+    ): Converter<ResponseBody, *>? {
+        return if(annotations.none {
+                it is GET && it.value.contains("geetest")
+            }) {
+            MihoyoDataConverter<Any>(type)
+        }else {
+            null
+        }
     }
 }
 
@@ -133,7 +148,7 @@ class MihoyoDataConverter<T>(private val type: Type) : Converter<ResponseBody, T
                 it.charStream(),
                 JsonUtils.newParameterizedType(MihoyoData::class.java, type)
             ) ?: throw JsonIOException("json result is null")
-            if (data.retcode != 0) {
+            if ((data.retcode == 0 || data.status == "success").not()) {
                 throw MihoyoException(data.retcode ?: -1, data.message.orEmpty())
             }
             data.data

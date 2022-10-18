@@ -24,9 +24,15 @@ interface MihoyoInterface {
     @POST("event/bbs_sign_reward/sign")
     suspend fun signGenshin(
         @Header("Cookie") cookie: String,
-        @Body request: MihoyoSignRequest
-    ): Any
+        @Body request: MihoyoSignRequest,
+        @HeaderMap headerMap: Map<String, String>? = null
+    ): MihoyoSignResult
 
+    @GET("https://api.geetest.com/ajax.php?&lang=zh-cn&pt=3&client_type=web_mobile&callback=geetest_1663984420850")
+    suspend fun getSignCode(
+        @Query("gt") gt: String?,
+        @Query("challenge") challenge: String?
+    ): String
 }
 
 class MihoyoRoleListData(val list: List<MihoyoRole>? = null)
@@ -66,3 +72,14 @@ class MihoyoSignRequest(
     val region: String,
     val uid: String
 )
+
+class MihoyoSignResult(
+    val code: String? = null,
+    @SerializedName("risk_code")
+    val riskCode: Int? = null,
+    val gt: String? = null,
+    val challenge: String? = null
+)
+
+
+class MihoyoValidateResult(val validate: String? = null)

@@ -21,9 +21,11 @@ import com.lifefighter.overlord.net.MihoyoSignRequest
 import com.lifefighter.utils.*
 import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
+import kotlinx.coroutines.delay
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 
 /**
  * @author xzp
@@ -107,10 +109,7 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
                 !it.todaySigned
             }.forEach { account ->
                 try {
-                    mihoyoInterface.signGenshin(
-                        cookie = account.cookie,
-                        request = MihoyoSignRequest(region = account.region, uid = account.uid)
-                    )
+                    signGenshin(mihoyoInterface, account)
                     toast("恭喜${account.nickname}签到成功")
                 } catch (e: MihoyoException) {
                     when (e.code) {
@@ -164,6 +163,44 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
     }
 }
 
+suspend fun signGenshin(mihoyoInterface: MihoyoInterface, account: MihoyoAccount) {
+    var retryTimes = 3
+    //验证码请求头
+    val codeMap = hashMapOf<String, String>()
+    while (retryTimes >= 0) {
+        retryTimes--
+        val result = mihoyoInterface.signGenshin(
+            cookie = account.cookie,
+            request = MihoyoSignRequest(region = account.region, uid = account.uid),
+            headerMap = codeMap
+        )
+        if (result.riskCode == 375) {
+            // 触发了验证码
+            result.challenge?.let {
+                codeMap["x-rpc-challenge"] = it
+            }
+            val validate = mihoyoInterface.getSignCode(
+                gt = result.gt,
+                challenge = result.challenge
+            ).let {
+                val pattern = Pattern.compile("^.+\"validate\": \"(.+?)\".+$")
+                val matcher = pattern.matcher(it)
+                if(matcher.matches()){
+                    matcher.group(1)
+                }else {
+                    null
+                }
+            } ?: break
+            codeMap["x-rpc-validate"] = validate
+            codeMap["x-rpc-seccode"] = "$validate|jordan"
+            delay(3000)
+        } else {
+            return
+        }
+    }
+    throw MihoyoException(code = -1000, "验证码无法破解")
+}
+
 class MihoyoAccountItemModel(val account: MihoyoAccount) {
     val name = "${account.nickname}(${account.regionName})"
     val todaySigned = account.todaySigned
@@ -184,10 +221,7 @@ class SignWork(
                 !it.todaySigned
             }.forEach {
                 try {
-                    mihoyoInterface.signGenshin(
-                        cookie = it.cookie,
-                        request = MihoyoSignRequest(region = it.region, uid = it.uid)
-                    )
+                    signGenshin(mihoyoInterface, it)
                     notifySignResult(it, true)
                     updateAccountInfo(it)
                 } catch (e: MihoyoException) {
