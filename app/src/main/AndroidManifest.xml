@@ -55,11 +55,6 @@
             android:label="@string/wechat_accessibility_setting_title"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".action.accessibility.wool.WoolSettingActivity"
-            android:label="@string/wool_setting_title"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.work.impl.WorkManagerInitializer"

@@ -2,7 +2,8 @@ package com.lifefighter.overlord.action.sign
 
 import android.os.Bundle
 import android.view.ViewGroup
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.WebView
 import com.lifefighter.base.BaseActivity
 import com.lifefighter.base.withLoadingDialog
 import com.lifefighter.overlord.R
@@ -21,28 +22,15 @@ import com.lifefighter.utils.toast
  * @created on 2021/3/8.
  */
 class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>() {
+    private var userAgent: String? = null
     override fun getLayoutId(): Int = R.layout.activity_add_mihoyo_account
     override fun onLifecycleInit(savedInstanceState: Bundle?) {
-        viewBinding.web.settings.apply {
-            userAgentString =
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
-            javaScriptEnabled = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            displayZoomControls = false
-            allowContentAccess = true
-            databaseEnabled = true
-            domStorageEnabled = true
-            setAppCacheEnabled(true)
-            savePassword = false
-            saveFormData = false
-            useWideViewPort = true
-        }
         CookieManager.getInstance().removeAllCookies(null)
         CookieManager.getInstance().flush()
+        userAgent = viewBinding.web.userAgent
         viewBinding.web.apply {
+            userAgent =
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
             clearCache(true)
             clearHistory()
             removeJavascriptInterface("searchBoxJavaBridge_")
@@ -80,7 +68,8 @@ class AddMihoyoAccountActivity : BaseActivity<ActivityAddMihoyoAccountBinding>()
                     cookie = cookie,
                     lastSignDay = if (signInfo.sign != true) 0 else System.currentTimeMillis(),
                     signDays = signInfo.totalSignDay.orZero(),
-                    level = it.level.orZero()
+                    level = it.level.orZero(),
+                    userAgent = userAgent
                 )
             }?.let {
                 get<MihoyoAccountDao>().add(*it.toTypedArray())

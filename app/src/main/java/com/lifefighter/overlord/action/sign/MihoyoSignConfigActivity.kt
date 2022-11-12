@@ -2,6 +2,8 @@ package com.lifefighter.overlord.action.sign
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -16,16 +18,12 @@ import com.lifefighter.overlord.databinding.MihoyoAccountItemBinding
 import com.lifefighter.overlord.db.MihoyoAccount
 import com.lifefighter.overlord.db.MihoyoAccountDao
 import com.lifefighter.overlord.net.MihoyoException
-import com.lifefighter.overlord.net.MihoyoInterface
-import com.lifefighter.overlord.net.MihoyoSignRequest
 import com.lifefighter.utils.*
 import com.lifefighter.widget.adapter.DataBindingAdapter
 import com.lifefighter.widget.adapter.ViewItemBinder
-import kotlinx.coroutines.delay
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern
 
 /**
  * @author xzp
@@ -54,17 +52,8 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
             R.layout.mihoyo_account_item,
             this
         )
-        mihoyoItemBinder.onItemClick = { _, item, position ->
-            AlertDialog.Builder(this).setMessage("确定删除?")
-                .setPositiveButton("确定") { _, _ ->
-                    launch {
-                        val accountDao = get<MihoyoAccountDao>()
-                        accountDao.delete(item.account)
-                        adapter.removeAt(position)
-                    }
-                }
-                .setNegativeButton("取消", null)
-                .create().show()
+        mihoyoItemBinder.onItemClick = { _, item, _ ->
+            showMoreOptions(item)
         }
         adapter.addItemBinder(mihoyoItemBinder)
         viewBinding.refreshLayout.setOnRefreshListener { layout ->
@@ -89,6 +78,51 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
         }
     }
 
+    private fun showMoreOptions(item: MihoyoAccountItemModel) {
+        val dialogBuilder = AlertDialog.Builder(this)
+        val options = arrayOf(DELETE_OPTION, CHANGE_UA_OPTION)
+        dialogBuilder.setItems(options) { _, which ->
+            when (options[which]) {
+                DELETE_OPTION -> delete(item)
+                CHANGE_UA_OPTION -> changeUserAgent(item)
+            }
+        }
+        dialogBuilder.create().show()
+    }
+
+    private fun delete(item: MihoyoAccountItemModel) {
+        AlertDialog.Builder(this).setMessage("确定删除?")
+            .setPositiveButton("确定") { _, _ ->
+                launch {
+                    val accountDao = get<MihoyoAccountDao>()
+                    accountDao.delete(item.account)
+                    val position = adapter.getItemPosition(item)
+                    if (position >= 0) {
+                        adapter.removeAt(position)
+                    }
+                }
+            }
+            .setNegativeButton("取消", null)
+            .create().show()
+    }
+
+    private fun changeUserAgent(item: MihoyoAccountItemModel) {
+        val dialogBuilder = AlertDialog.Builder(this)
+        val contentView = LayoutInflater.from(this).inflate(R.layout.mihoyo_change_user_agent, null)
+        val editText = contentView.findViewById<EditText>(R.id.editText)
+        editText.setText(item.account.userAgent.orEmpty())
+        dialogBuilder.setView(contentView)
+            .setPositiveButton("确定") { _, _ ->
+                launch {
+                    val accountDao = get<MihoyoAccountDao>()
+                    accountDao.update(item.account.copy(userAgent = editText.text.toString()))
+                }
+            }
+            .setNegativeButton("取消", null)
+
+        dialogBuilder.create().show()
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onEvent(event: MihoyoAccountAddEvent) {
         viewBinding.refreshLayout.autoRefresh()
@@ -96,20 +130,15 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
 
     private fun signAllAccount() {
         launch {
-            val accountDao = get<MihoyoAccountDao>()
-            val mihoyoInterface = get<MihoyoInterface>()
-            val accountList = accountDao.getAll().filter {
-                !it.todaySigned
-            }
+            val signHelper = get<MihoyoSignHelper>()
+            val accountList = signHelper.getUnsignedAccount()
             if (accountList.isEmpty()) {
                 toast("所有账户都已经签到过了")
                 return@launch
             }
-            accountList.filter {
-                !it.todaySigned
-            }.forEach { account ->
+            accountList.forEach { account ->
                 try {
-                    signGenshin(mihoyoInterface, account)
+                    signHelper.signGenshin(account)
                     toast("恭喜${account.nickname}签到成功")
                 } catch (e: MihoyoException) {
                     when (e.code) {
@@ -121,17 +150,7 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
                         }
                     }
                 }
-                val signInfo = mihoyoInterface.getSignInfo(
-                    cookie = account.cookie,
-                    region = account.region,
-                    uid = account.uid
-                )
-                accountDao.update(
-                    account.copy(
-                        lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
-                        signDays = signInfo.totalSignDay.orZero()
-                    )
-                )
+                signHelper.updateAccountInfo(account)
             }
             viewBinding.refreshLayout.autoRefresh()
         }.withLoadingDialog(this)
@@ -161,45 +180,13 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
             signWorkRunningData.value = !signWorkRunningData.value.orFalse()
         }
     }
+
+    companion object {
+        const val DELETE_OPTION = "删除"
+        const val CHANGE_UA_OPTION = "修改UserAgent"
+    }
 }
 
-suspend fun signGenshin(mihoyoInterface: MihoyoInterface, account: MihoyoAccount) {
-    var retryTimes = 3
-    //验证码请求头
-    val codeMap = hashMapOf<String, String>()
-    while (retryTimes >= 0) {
-        retryTimes--
-        val result = mihoyoInterface.signGenshin(
-            cookie = account.cookie,
-            request = MihoyoSignRequest(region = account.region, uid = account.uid),
-            headerMap = codeMap
-        )
-        if (result.riskCode == 375) {
-            // 触发了验证码
-            result.challenge?.let {
-                codeMap["x-rpc-challenge"] = it
-            }
-            val validate = mihoyoInterface.getSignCode(
-                gt = result.gt,
-                challenge = result.challenge
-            ).let {
-                val pattern = Pattern.compile("^.+\"validate\": \"(.+?)\".+$")
-                val matcher = pattern.matcher(it)
-                if(matcher.matches()){
-                    matcher.group(1)
-                }else {
-                    null
-                }
-            } ?: break
-            codeMap["x-rpc-validate"] = validate
-            codeMap["x-rpc-seccode"] = "$validate|jordan"
-            delay(3000)
-        } else {
-            return
-        }
-    }
-    throw MihoyoException(code = -1000, "验证码无法破解")
-}
 
 class MihoyoAccountItemModel(val account: MihoyoAccount) {
     val name = "${account.nickname}(${account.regionName})"
@@ -211,24 +198,21 @@ class MihoyoAccountItemModel(val account: MihoyoAccount) {
 
 class SignWork(
     context: Context,
-    private val accountDao: MihoyoAccountDao,
-    private val mihoyoInterface: MihoyoInterface,
+    private val signHelper: MihoyoSignHelper,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         try {
-            accountDao.getAll().filter {
-                !it.todaySigned
-            }.forEach {
+            signHelper.getUnsignedAccount().forEach {
                 try {
-                    signGenshin(mihoyoInterface, it)
+                    signHelper.signGenshin(it)
                     notifySignResult(it, true)
-                    updateAccountInfo(it)
+                    signHelper.updateAccountInfo(it)
                 } catch (e: MihoyoException) {
                     when (e.code) {
-                        -5003 -> {
+                        AppConst.MIHOYO_ALREADY_SIGN_CODE -> {
                             notifySignResult(it, false, "你已经签到过了")
-                            updateAccountInfo(it)
+                            signHelper.updateAccountInfo(it)
                         }
                         else -> {
                             notifySignResult(it, false, e.message)
@@ -262,41 +246,12 @@ class SignWork(
             .notify(account.uid.hashCode(), notification)
     }
 
-    private suspend fun updateAccountInfo(account: MihoyoAccount) {
-        val signInfo = mihoyoInterface.getSignInfo(
-            cookie = account.cookie,
-            region = account.region,
-            uid = account.uid
-        )
-        val userInfo = tryOrNull {
-            mihoyoInterface.getRoles(account.cookie).list?.firstOrNull {
-                it.gameUid == account.uid && it.region == account.region
-            }
-        }
-        if (userInfo == null) {
-            accountDao.update(
-                account.copy(
-                    lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
-                    signDays = signInfo.totalSignDay.orZero()
-                )
-            )
-        } else {
-            accountDao.update(
-                account.copy(
-                    nickname = userInfo.nickname.orEmpty(),
-                    level = userInfo.level.orZero(),
-                    lastSignDay = if (signInfo.sign != true) account.lastSignDay else System.currentTimeMillis(),
-                    signDays = signInfo.totalSignDay.orZero()
-                )
-            )
-        }
-    }
 
     companion object {
-        val TAG = SignWork::class.java.name
+        val TAG: String = SignWork::class.java.name
         fun startWork(context: Context) {
             val request = PeriodicWorkRequestBuilder<SignWork>(
-                1,
+                4,
                 TimeUnit.HOURS
             ).addTag(TAG).build()
             WorkManager.getInstance(context)

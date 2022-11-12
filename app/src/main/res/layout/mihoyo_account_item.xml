@@ -88,13 +88,24 @@
                 app:layout_constraintTop_toBottomOf="@+id/levelView"
                 tools:text="本月已经签到27天" />
 
+            <com.lifefighter.widget.text.ExText
+                android:id="@+id/moreView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:singleLine="true"
+                android:text="更多操作"
+                android:textColor="?colorPrimary"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
             <com.lifefighter.widget.card.ExCardView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:rotation="30"
                 app:cardBackgroundColor="@color/transparent"
                 app:goneIfNot="@{m.todaySigned}"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:shapeAppearance="@style/ExShapeAppearance.Stadium"
@@ -109,6 +120,7 @@
                     android:textSize="16sp"
                     android:text="签" />
             </com.lifefighter.widget.card.ExCardView>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.lifefighter.widget.card.ExCardView>
 

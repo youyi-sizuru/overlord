@@ -11,7 +11,7 @@ import org.koin.dsl.module
  * @author xzp
  * @created on 2021/3/13.
  */
-@Database(entities = [MihoyoAccount::class], version = 2, exportSchema = false)
+@Database(entities = [MihoyoAccount::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun getMihoyoAccountDao(): MihoyoAccountDao
 }
@@ -26,6 +26,11 @@ object AppDatabaseModule {
                 override fun migrate(database: SupportSQLiteDatabase) {
                     database.execSQL("alter table mihoyo_account add column level INTEGER NOT NULL default 0")
                 }
+            }, object :Migration(2, 3){
+                override fun migrate(database: SupportSQLiteDatabase) {
+                    database.execSQL("alter table mihoyo_account add column userAgent TEXT")
+                }
+
             }).build()
         }
         single {

@@ -16,4 +16,5 @@ object AppConst {
     const val WOOL_APP_PACKAGE_NAMES = "wool_app_package_names"
     const val WOOL_FLOAT_TAG = "wool_float_tag"
     const val WOOL_APK_PATH = "wool/wool.apk"
+    const val USER_AGENT = "User-Agent"
 }

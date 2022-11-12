@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.lifefighter.widget.card.ExCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_padding_horizontal"
+        android:layout_marginVertical="@dimen/default_padding_vertical"
+        android:elevation="0dp"
+        app:cardBackgroundColor="@color/light"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.lifefighter.widget.text.ExEditText
+            android:id="@+id/editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="top"
+            android:hint="请输入UserAgent"
+            android:minLines="3"
+            android:padding="8dp"
+            android:textColorHint="@color/gray"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="parent" />
+    </com.lifefighter.widget.card.ExCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.lifefighter.overlord.net
 
 import com.google.gson.annotations.SerializedName
+import com.lifefighter.overlord.AppConst
 import retrofit2.http.*
 
 /**
@@ -25,14 +26,11 @@ interface MihoyoInterface {
     suspend fun signGenshin(
         @Header("Cookie") cookie: String,
         @Body request: MihoyoSignRequest,
-        @HeaderMap headerMap: Map<String, String>? = null
+        @HeaderMap headerMap: Map<String, String>? = null,
+        @Header(AppConst.USER_AGENT) userAgent: String? = null
     ): MihoyoSignResult
 
-    @GET("https://api.geetest.com/ajax.php?&lang=zh-cn&pt=3&client_type=web_mobile&callback=geetest_1663984420850")
-    suspend fun getSignCode(
-        @Query("gt") gt: String?,
-        @Query("challenge") challenge: String?
-    ): String
+
 }
 
 class MihoyoRoleListData(val list: List<MihoyoRole>? = null)
@@ -80,6 +78,3 @@ class MihoyoSignResult(
     val gt: String? = null,
     val challenge: String? = null
 )
-
-
-class MihoyoValidateResult(val validate: String? = null)
