@@ -115,7 +115,9 @@ class MihoyoSignConfigActivity : BaseActivity<ActivityMihoyoSignConfigBinding>()
             .setPositiveButton("确定") { _, _ ->
                 launch {
                     val accountDao = get<MihoyoAccountDao>()
-                    accountDao.update(item.account.copy(userAgent = editText.text.toString()))
+                    val newUserAgent = editText.text.toString()
+                    item.account.userAgent = newUserAgent
+                    accountDao.update(item.account)
                 }
             }
             .setNegativeButton("取消", null)

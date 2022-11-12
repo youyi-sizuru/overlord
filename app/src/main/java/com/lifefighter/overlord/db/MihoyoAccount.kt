@@ -17,7 +17,7 @@ data class MihoyoAccount(
     val lastSignDay: Long = 0,
     val signDays: Int = 0,
     val level: Int = 0,
-    val userAgent: String? = null
+    var userAgent: String? = null
 ) {
     val todaySigned: Boolean
         get() {
