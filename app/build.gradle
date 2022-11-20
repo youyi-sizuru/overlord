@@ -10,8 +10,8 @@ android {
         applicationId "com.lifefighter.overlord"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "1.1.5"
+        versionCode 6
+        versionName "1.1.6"
     }
 
     signingConfigs {

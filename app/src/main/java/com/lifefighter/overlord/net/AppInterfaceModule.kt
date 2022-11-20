@@ -26,6 +26,7 @@ import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 import kotlin.random.Random
 
 /**
@@ -102,13 +103,14 @@ class MihoyoRequestInterceptor : Interceptor {
         val cookie = oldRequest.header("Cookie").orEmpty()
         val requestBuilder = oldRequest.newBuilder()
         val oldUserAgent = oldRequest.header(AppConst.USER_AGENT)
+        val appVersion = "2.38.1"
         val newUserAgent = if (oldUserAgent.isNullOrEmpty()) {
-            "Mozilla/5.0 (Linux; Android 10; MIX 2 Build/QKQ1.190825.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.101 Mobile Safari/537.36 miHoYoBBS/2.35.2"
+            "Mozilla/5.0 (Linux; Android 10; MIX 2 Build/QKQ1.190825.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.101 Mobile Safari/537.36 miHoYoBBS/${appVersion}"
         } else {
             if (oldUserAgent.contains("miHoYoBBS")) {
                 oldUserAgent
             } else {
-                oldUserAgent.plus(" miHoYoBBS/2.35.2")
+                oldUserAgent.plus(" miHoYoBBS/${appVersion}")
             }
         }
         requestBuilder.header(AppConst.USER_AGENT, newUserAgent)
@@ -129,14 +131,14 @@ class MihoyoRequestInterceptor : Interceptor {
                 .replace("-", "").toUpperCase(Locale.getDefault())
         )
         requestBuilder.addHeader("x-rpc-client_type", "5")
-        requestBuilder.addHeader("x-rpc-app_version", "2.35.2")
+        requestBuilder.addHeader("x-rpc-app_version", appVersion)
         requestBuilder.addHeader("DS", createDs())
         val newRequest = requestBuilder.build()
         return chain.proceed(newRequest)
     }
 
     private fun createDs(): String {
-        val n = "N50pqm7FSy2AkFz2B3TqtuZMJ5TOl3Ep"
+        val n = "yUZ3s0Sna1IrSNfk29Vo6vRapdOyqyhB"
         val i = System.currentTimeMillis().div(1000).toString()
         val r = (1..6)
             .map { Random.nextInt(0, charList.size) }

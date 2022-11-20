@@ -8,6 +8,7 @@ import com.lifefighter.utils.parseJson
 import com.lifefighter.utils.tryOrNull
 import kotlinx.coroutines.delay
 import java.util.regex.Pattern
+import kotlin.random.Random
 
 class MihoyoSignHelper(
     private val accountDao: MihoyoAccountDao,
@@ -27,7 +28,8 @@ class MihoyoSignHelper(
                 userAgent = account.userAgent
             )
             if (result.riskCode == 375) {
-                // 触发了验证码
+                // 触发了验证码, 慢一点去请求接口
+                delay(Random.nextLong(3000, 5000))
                 result.challenge?.let {
                     codeMap["x-rpc-challenge"] = it
                 }
@@ -47,11 +49,13 @@ class MihoyoSignHelper(
 
                 codeMap["x-rpc-validate"] = validate
                 codeMap["x-rpc-seccode"] = "$validate|jordan"
-                delay(3000)
+                delay(Random.nextLong(3000, 5000))
             } else {
+                account.challengeFailDay = 0
                 return
             }
         }
+        account.challengeFailDay = System.currentTimeMillis()
         throw MihoyoException(code = -1000, "验证码无法破解")
     }
 
