@@ -205,7 +205,10 @@ class SignWork(
 ) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         try {
-            signHelper.getUnsignedAccount().forEach {
+            signHelper.getUnsignedAccount().filter {
+                // 出现验证码检测失败后，2天内不要进行自动签到
+                System.currentTimeMillis() - it.challengeFailDay > 48 * 3600 * 1000
+            }.forEach {
                 try {
                     signHelper.signGenshin(it)
                     notifySignResult(it, true)
